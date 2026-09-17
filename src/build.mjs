@@ -157,7 +157,11 @@ function renderPage({ template, groups, region, range, days, dataDays, startIso,
     tile('Average price', pence(stats.avg), `across ${dataDays.length} days`),
     tile('Cheapest half-hour', pence(stats.cheapest.incVat), longDateTime(stats.cheapest.from)),
     tile('Hours of negative pricing', hours(stats.negativeSlots), `${stats.negativeSlots} half-hour ${stats.negativeSlots === 1 ? 'slot' : 'slots'}`),
-    tile('Days with a negative period', String(stats.negativeDays), `of ${dataDays.length} days`),
+    tile(
+      'Days with a negative period',
+      String(stats.negativeDays),
+      `of ${dataDays.length} days (${Math.round((stats.negativeDays / dataDays.length) * 100)}% of days)`,
+    ),
   ].join('\n');
 
   const tableRows = dataDays
