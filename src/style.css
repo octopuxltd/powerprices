@@ -80,7 +80,29 @@ main > .measure { padding-inline: 0; }
 }
 .wordmark .tld { color: var(--muted); font-weight: 400; }
 
-.intro { margin-block: 3rem 2rem; }
+/* Intro: title and description on the left, referral box on the right, each
+   half the width on desktop; stacked on narrower screens. */
+.intro {
+  margin-block: 3rem 2rem;
+  display: grid;
+  gap: 1.5rem;
+  align-items: start;
+}
+@media (min-width: 52rem) {
+  .intro { grid-template-columns: 1fr 1fr; gap: 2.5rem; }
+}
+
+/* A wash of the brand pink, so it sits well on both the light and dark page. */
+.referral {
+  padding: 1.25rem 1.5rem;
+  border: 1px solid color-mix(in srgb, var(--series) 45%, transparent);
+  border-radius: 0.75rem;
+  background: color-mix(in srgb, var(--series) 12%, transparent);
+  font-size: 1.0625rem;
+  line-height: 1.5;
+}
+.referral p { margin: 0; }
+.referral a { font-weight: 600; overflow-wrap: anywhere; }
 
 h1 {
   font-size: clamp(1.75rem, 4vw, 2.5rem);
