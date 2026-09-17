@@ -163,6 +163,11 @@ function renderPage({ template, groups, region, range, days, dataDays, startIso,
   const regionSelect = REGIONS.map(
     (r) => `<option value="${pageHref(r, range)}"${r === region ? ' selected' : ''}>${escapeHtml(r.name)} (${r.code})</option>`,
   ).join('');
+  // Same list without the codes, for the drop-down inside the intro sentence
+  // (the sentence already says "(region C)" after it).
+  const regionSelectNames = REGIONS.map(
+    (r) => `<option value="${pageHref(r, range)}"${r === region ? ' selected' : ''}>${escapeHtml(r.name)}</option>`,
+  ).join('');
   const rangeSelect = groups
     .flat()
     .map((r) => `<option value="${pageHref(region, r)}"${r === range ? ' selected' : ''}>${r.label}</option>`)
@@ -200,7 +205,7 @@ function renderPage({ template, groups, region, range, days, dataDays, startIso,
     regionSelect,
     rangeSelect,
     regionName: escapeHtml(region.name),
-    lede: ledeText(region, longDate(startIso), longDate(endIso)),
+    lede: ledeText(region, longDate(startIso), longDate(endIso), regionSelectNames),
     ledeGhost: ledeText(longestRegion, '28 Sep 2026', '28 Sep 2026'),
     stats: statsHtml,
     // Calendar years always get month labels, even the short first one (Oct to Dec 2024).
@@ -224,9 +229,20 @@ function negativeHoursDetail(stats) {
   return `avg negative day gets ${perDay.toFixed(1)} hrs`;
 }
 
-function ledeText(region, fromDate, toDate) {
+/**
+ * The intro sentence. With `options` (the region <option>s for the current
+ * range) the region name becomes an inline drop-down that switcher.js drives;
+ * the plain name stays in the markup for the no-script case (style.css swaps
+ * them on the .js class). The ghost copy passes no options.
+ */
+function ledeText(region, fromDate, toDate, options) {
   const date = (d) => `<span class="nowrap">${d}</span>`;
-  return `Half-hourly electricity prices for ${escapeHtml(region.name)} (region ${region.code}), ${date(fromDate)} to ${date(toDate)}.`;
+  const name = escapeHtml(region.name);
+  const regionPart = options
+    ? `<span class="region-text">${name}</span>` +
+      `<select class="switcher-select lede-select" aria-label="Region">${options}</select>`
+    : name;
+  return `Half-hourly electricity prices for ${regionPart} (region ${region.code}), ${date(fromDate)} to ${date(toDate)}.`;
 }
 
 /**
