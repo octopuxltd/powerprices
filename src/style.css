@@ -17,6 +17,7 @@
   --series: #f050f8;          /* daily average bar: Octopus brand pink */
   --max: #180048;             /* dearest half-hour marker: Octopus dark blue */
   --prev: #00c8f8;            /* previous year's trend: Octopus cyan */
+  --link: #003fc4;            /* referral link: Octopus blue */
   --good: #0ca30c;            /* negative prices */
   --tip-bg: #0b0b0b;
   --tip-fg: #ffffff;
@@ -37,6 +38,7 @@
     --border: rgba(255, 255, 255, 0.1);
     /* Navy vanishes on a near-black surface; this is Octopus's own lavender step. */
     --max: #a49fc8;
+    --link: #7fb0ff; /* a lighter step of the blue so it reads on the dark surface */
     --tip-bg: #f4f4f2;
     --tip-fg: #0b0b0b;
   }
@@ -107,7 +109,7 @@ main > .measure { padding-inline: 0; }
   .referral { justify-self: start; }
 }
 .referral p { margin: 0; }
-.referral a { font-weight: 600; overflow-wrap: anywhere; }
+.referral a { color: var(--link); font-weight: 600; overflow-wrap: anywhere; }
 
 h1 {
   font-size: clamp(1.75rem, 4vw, 2.5rem);
