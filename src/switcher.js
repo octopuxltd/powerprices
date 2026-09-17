@@ -9,7 +9,11 @@
 const SWITCHER_LINK = '.switcher a[href]';
 
 async function swapTo(url, { push }) {
-  const res = await fetch(url, { headers: { Accept: 'text/html' } });
+  // 'no-cache' revalidates with the server (cheap: the host answers 304 when
+  // unchanged) instead of reusing a copy the browser cached before the last
+  // deploy. Without it a switch could serve a page from before a deploy for up
+  // to the host's cache lifetime.
+  const res = await fetch(url, { headers: { Accept: 'text/html' }, cache: 'no-cache' });
   if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
   const doc = new DOMParser().parseFromString(await res.text(), 'text/html');
   const nextMain = doc.querySelector('main');
