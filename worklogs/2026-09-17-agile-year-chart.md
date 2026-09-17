@@ -3,6 +3,7 @@ _Updated: 2026-09-17 16:30_
 **Status:** complete
 
 ## Milestones (append-only)
+- 2026-09-17 17:50 — HTTPS live on powerprices.co.uk and enforced (http → 301 https). Certificate arrived within a minute of re-saving the custom domain.
 - 2026-09-17 17:10 — 7-day centred moving-average trend line in pink at 50% (`renderTrend()`: nested `<svg viewBox="0 0 n h" preserveAspectRatio="none">` with `vector-effect="non-scaling-stroke"`, because a `<path>` can't take percentage x). Key label wording and the negative-hours tooltip wording also changed at Paul's request.
 - 2026-09-17 16:50 — dots are now exactly the column width (nested `<svg viewBox="0 0 2 2">` scaled to the column, so it stays fluid); range line and ticks at 30%; one y scale on every page (−20p to 100p today); store rewritten to final days only (fixes the daily-commit conflict).
 - 2026-09-17 16:30 — marks redesigned: pink dot at the average (radius = old half bar width, floor 1.5px), single navy range line max→min with navy ticks at both ends, all at 50%; green dip overlay unchanged. Header and footer now full width (the `.measure` on them double-counted the gutter and made them narrower than everything else).
