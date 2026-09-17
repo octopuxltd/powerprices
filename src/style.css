@@ -1,0 +1,399 @@
+/* powerprices.co.uk — page styles and chart theme.
+   Chart colours are custom properties so the inline SVG follows light/dark. */
+
+:root {
+  color-scheme: light dark;
+
+  --page: #f9f9f7;
+  --surface: #fcfcfb;
+  --ink: #0b0b0b;
+  --ink-2: #52514e;
+  --muted: #898781;
+  --hairline: #e1e0d9;
+  --baseline: #c3c2b7;
+  --border: rgba(11, 11, 11, 0.1);
+
+  /* Series colours come from octopus.energy's own CSS tokens. */
+  --series: #f050f8;          /* daily average bar: Octopus brand pink */
+  --max: #180048;             /* dearest half-hour marker: Octopus dark blue */
+  --good: #0ca30c;            /* negative prices */
+  --tip-bg: #0b0b0b;
+  --tip-fg: #ffffff;
+
+  --font: system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+  --measure: 72rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --page: #0d0d0d;
+    --surface: #1a1a19;
+    --ink: #ffffff;
+    --ink-2: #c3c2b7;
+    --muted: #898781;
+    --hairline: #2c2c2a;
+    --baseline: #383835;
+    --border: rgba(255, 255, 255, 0.1);
+    /* Navy vanishes on a near-black surface; this is Octopus's own lavender step. */
+    --max: #a49fc8;
+    --tip-bg: #f4f4f2;
+    --tip-fg: #0b0b0b;
+  }
+}
+
+* { box-sizing: border-box; }
+
+html { font-family: var(--font); font-size: 16px; line-height: 1.5; }
+
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; }
+
+/* Layout ------------------------------------------------------------------ */
+
+/* Text blocks sit at a reading measure; the chart section breaks out to the
+   full page width (it only gets the page gutter). */
+.site-header,
+main,
+.site-footer {
+  padding-inline: clamp(1rem, 4vw, 2.5rem);
+}
+.measure {
+  max-width: var(--measure);
+  margin-inline: auto;
+}
+main > .measure { padding-inline: 0; }
+
+.site-header { padding-block: 1.5rem 0; }
+
+.wordmark {
+  font-weight: 600;
+  font-size: 1rem;
+  letter-spacing: -0.01em;
+  text-decoration: none;
+}
+.wordmark .tld { color: var(--muted); font-weight: 400; }
+
+.intro { margin-block: 3rem 2rem; }
+
+h1 {
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin: 0 0 0.75rem;
+}
+
+.lede {
+  max-width: 44rem;
+  margin: 0;
+  color: var(--ink-2);
+  font-size: 1.0625rem;
+}
+/* Both copies share one grid cell: the visible lede and a hidden one with
+   the longest possible wording. The cell takes the taller, so the block's
+   height is the same on every page and the chart below never jumps. */
+.lede-box { display: grid; }
+.lede-box > .lede { grid-area: 1 / 1; }
+.lede-ghost { visibility: hidden; }
+
+/* Stat tiles -------------------------------------------------------------- */
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 1rem;
+  margin-block: 0 2rem;
+}
+
+.stat {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  padding: 1rem 1.125rem;
+}
+.stat .label { margin: 0; color: var(--ink-2); font-size: 0.875rem; }
+.stat .value { margin: 0.25rem 0 0; font-size: 1.75rem; font-weight: 600; letter-spacing: -0.02em; line-height: 1.1; }
+.stat .detail { margin: 0.25rem 0 0; color: var(--muted); font-size: 0.8125rem; white-space: nowrap; }
+
+/* Page-to-page transitions ---------------------------------------------------
+   Each time range is a separate page, so switching is a navigation. Opting in
+   to cross-document view transitions turns the reload flash into a crossfade,
+   and naming the chart section lets it slide to its new position instead of
+   blinking. Browsers without support just navigate as normal. */
+@view-transition { navigation: auto; }
+@media (prefers-reduced-motion: reduce) {
+  @view-transition { navigation: none; }
+}
+.chart-section { view-transition-name: chart; }
+/* The highlight is a pseudo-element (see .switcher below) so only the pill
+   background slides to the newly selected label; the labels themselves stay
+   where they are. Naming the <a> instead would drag its text along too. */
+.ranges a[aria-current="page"]::before { view-transition-name: range-current; }
+.regions a[aria-current="page"]::before { view-transition-name: region-current; }
+/* During the animation every named element becomes its own layer, stacked in
+   paint order. That put the sliding pill above the labels it passed in one
+   direction and below them in the other, so pin the order: pills at the
+   bottom, everything else above. */
+::view-transition-group(*) { z-index: 1; }
+::view-transition-group(range-current),
+::view-transition-group(region-current) { z-index: 0; }
+
+/* Chart ------------------------------------------------------------------- */
+
+.chart-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  scroll-margin-top: 1.5rem; /* where a range switch lands, via the #daily-prices anchor */
+}
+
+.chart-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  margin-bottom: 1rem;
+}
+/* Switchers (region, time range): plain links styled as a segmented control. */
+.switcher {
+  display: inline-flex;
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ink) 4%, transparent);
+}
+.switcher a {
+  position: relative;
+  z-index: 0; /* own stacking context, so the ::before highlight sits under the text but inside the link */
+  padding: 0.3rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  color: var(--ink-2);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.switcher a:hover { color: var(--ink); }
+.switcher .divider {
+  width: 1px;
+  margin: 4px 6px;
+  background: var(--border);
+}
+.switcher a[aria-current="page"] {
+  color: var(--ink);
+  font-weight: 500;
+}
+/* The highlight lives on a pseudo-element so it can animate independently of the label. */
+.switcher a[aria-current="page"]::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: 999px;
+  background: var(--surface);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+}
+.switcher-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.switcher-label {
+  color: var(--ink-2);
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+
+/* Region pills are single letters, so tighten them to keep all 14 on one row. */
+.regions a {
+  position: relative; /* anchors the hover card below the pill */
+  padding-inline: 0.6rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Region hover card: same look as the chart tooltips, no JS. Also shows on
+   keyboard focus. Pills near either end anchor the card to that end so it
+   can't run off the edge of the page. */
+.regions .tip {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+  padding: 10px 12px;
+  border-radius: 6px;
+  background: var(--tip-bg);
+  color: var(--tip-fg);
+  opacity: 0.94;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  text-align: left;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.regions a:hover .tip,
+.regions a:focus-visible .tip { display: block; }
+.regions a:nth-child(-n+3) .tip { left: 0; transform: none; }
+.regions a:nth-last-child(-n+3) .tip { left: auto; right: 0; transform: none; }
+.regions .tip > span { display: block; opacity: 0.85; }
+.regions .tip .tip-name { font-weight: 600; opacity: 1; }
+.regions .tip .tip-neg { color: var(--good); opacity: 1; }
+
+.chart-scroll { overflow-x: auto; }
+
+/* Y labels in an HTML column beside the SVG so they stay at real text size. */
+.chart-wrap {
+  display: grid;
+  grid-template-columns: 2.5rem 1fr;
+  /* Bars need about 2px each to stay legible; below that the chart scrolls sideways. */
+  min-width: max(720px, calc(var(--days, 365) * 2px));
+  font-family: var(--font);
+}
+.y-axis {
+  /* Sticks to the left edge while the chart scrolls sideways on narrow screens;
+     the background stops the bars showing through underneath the labels. */
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  height: var(--chart-h);
+  background: var(--surface);
+}
+/* The plot's left axis line, drawn here rather than in the SVG so it stays
+   put with the labels when the bars scroll underneath. */
+.y-axis::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: var(--plot-top);
+  bottom: var(--plot-bottom);
+  border-right: 1px solid var(--baseline);
+}
+.y-axis span {
+  position: absolute;
+  right: 0.5rem;
+  transform: translateY(-50%);
+  color: var(--muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.chart {
+  display: block;
+  width: 100%;
+  height: var(--chart-h);
+  overflow: visible;
+}
+
+.chart .grid { stroke: var(--hairline); stroke-width: 1; shape-rendering: crispEdges; }
+.chart .grid.baseline { stroke: var(--baseline); }
+.chart .grid.month { stroke: var(--hairline); }
+
+.chart .axis { fill: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+
+/* Range line is deliberately faint: 365 of them side by side would otherwise
+   read as a solid block and hide the average bars. */
+.chart .range { stroke: var(--series); stroke-width: 1; opacity: 0.28; }
+.chart .rise { stroke: var(--max); stroke-width: 1; opacity: 0.5; }
+.chart .avg { fill: var(--series); }
+.chart .marker { stroke: var(--series); stroke-width: 2; }
+.chart .marker.max { stroke: var(--max); opacity: 0.5; }
+/* Negative days: the dip below zero and its marker are heavier and green so they read at a glance. */
+.chart .dip { stroke: var(--good); stroke-width: 2.5; }
+.chart .has-negative .marker.min { stroke: var(--good); stroke-width: 3; }
+
+/* Hover layer: no JS. Each day has a full-height hit area; hovering it tints
+   the column and reveals that day's tooltip (built into the SVG at build time). */
+.chart .hit { fill: transparent; }
+.chart .day:hover .hit { fill: color-mix(in srgb, var(--ink) 6%, transparent); }
+.chart .tip { display: none; pointer-events: none; }
+.chart .day:hover .tip { display: block; }
+.chart .tip rect { fill: var(--tip-bg); opacity: 0.94; }
+.chart .tip text {
+  fill: var(--tip-fg);
+  font-size: 12px;
+  dominant-baseline: central; /* y is the row's centre line, not a baseline */
+  font-variant-numeric: tabular-nums;
+  opacity: 0.85;
+}
+.chart .tip .tip-date { font-weight: 600; opacity: 1; }
+.chart .tip .tip-avg { opacity: 1; }
+.chart .tip .tip-neg { fill: var(--good); opacity: 1; }
+
+/* Key --------------------------------------------------------------------- */
+
+.key {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  margin: 0 0 1rem;
+  padding: 0;
+  color: var(--ink-2);
+  font-size: 0.875rem;
+}
+.key li { display: inline-flex; align-items: center; gap: 0.5rem; }
+.swatch { display: inline-block; width: 14px; height: 14px; border-radius: 2px; }
+.swatch.bar { background: var(--series); width: 6px; }
+/* Marker swatches are a short horizontal tick in the marker's colour. */
+.swatch.marker, .swatch.negative {
+  height: 2px;
+  border-radius: 1px;
+}
+.swatch.marker.max { background: var(--max); }
+.swatch.marker.min { background: var(--series); }
+.swatch.negative { background: var(--good); height: 3px; }
+
+/* Table ------------------------------------------------------------------- */
+
+.table-section { margin-block: 2rem; }
+
+details summary {
+  cursor: pointer;
+  color: var(--ink-2);
+  font-size: 0.9375rem;
+}
+
+.table-scroll { overflow-x: auto; margin-top: 1rem; }
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  max-width: 32rem;
+  font-size: 0.9375rem;
+  font-variant-numeric: tabular-nums;
+}
+th, td { padding: 0.375rem 0.75rem 0.375rem 0; text-align: right; border-bottom: 1px solid var(--hairline); }
+th:first-child, td:first-child { text-align: left; white-space: nowrap; }
+th { font-weight: 500; color: var(--ink-2); }
+td.negative { color: var(--good); }
+
+/* Footer ------------------------------------------------------------------ */
+
+.site-footer {
+  margin-block: 3rem 2rem;
+  color: var(--muted);
+  font-size: 0.8125rem;
+}
+.site-footer p { margin: 0; }
+.site-footer a { white-space: nowrap; }
+.site-footer time { white-space: nowrap; }
+
+/* Utilities --------------------------------------------------------------- */
+
+.visually-hidden {
+  position: absolute;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

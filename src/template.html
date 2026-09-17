@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <meta name="color-scheme" content="light dark">
+  <title>Agile prices, {{rangeTitle}}, {{regionName}} · powerprices.co.uk</title>
+  <meta name="description" content="Octopus Agile electricity prices for {{regionName}}, day by day: average, minimum and maximum price for each day.">
+  <link rel="stylesheet" href="/style.css?v={{buildId}}">
+  <script type="module" src="/switcher.js?v={{buildId}}"></script>
+</head>
+<body>
+  <header class="site-header measure">
+    <a class="wordmark" href="/">powerprices<span class="tld">.co.uk</span></a>
+  </header>
+
+  <main>
+    <section class="intro measure">
+      <h1>Agile Octopus, {{rangeTitle}}</h1>
+      <div class="lede-box">
+        <p class="lede">{{lede}}</p>
+        <!-- Invisible copy with the longest region name, so the block is the same
+             height for every region and the chart doesn't jump on a switch. -->
+        <p class="lede lede-ghost" aria-hidden="true">{{ledeGhost}}</p>
+      </div>
+    </section>
+
+    <section class="stats measure" aria-label="Headline figures">
+      {{stats}}
+    </section>
+
+    <section class="chart-section" id="daily-prices" aria-labelledby="chart-heading">
+      <h2 id="chart-heading" class="visually-hidden">Daily prices</h2>
+      <div class="chart-toolbar">
+        <div class="switcher-group">
+          <span class="switcher-label" id="region-label">Region code</span>
+          <nav class="switcher regions" aria-labelledby="region-label">
+            {{regionNav}}
+          </nav>
+        </div>
+        <nav class="switcher ranges" aria-label="Time range">
+          {{rangeNav}}
+        </nav>
+      </div>
+      <ul class="key" aria-label="How to read the chart">
+        <li><span class="swatch bar"></span>Daily average</li>
+        <li><span class="swatch marker max"></span>Dearest half-hour</li>
+        <li><span class="swatch marker min"></span>Cheapest half-hour</li>
+        <li><span class="swatch negative"></span>Negative price (you’re paid to use power)</li>
+      </ul>
+      <div class="chart-scroll">
+        {{chart}}
+      </div>
+    </section>
+
+    <section class="table-section measure">
+      <details>
+        <summary>Show as a table</summary>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr><th scope="col">Date</th><th scope="col">Min</th><th scope="col">Average</th><th scope="col">Max</th></tr>
+            </thead>
+            <tbody>
+              {{tableRows}}
+            </tbody>
+          </table>
+        </div>
+      </details>
+    </section>
+  </main>
+
+  <footer class="site-footer measure">
+    <p>Prices include VAT, in pence per kWh. Data from the <a href="https://developer.octopus.energy/" rel="noreferrer">Octopus Energy API</a>, tariff {{tariff}} · Updated <time datetime="{{updatedIso}}">{{updated}}</time></p>
+  </footer>
+</body>
+</html>

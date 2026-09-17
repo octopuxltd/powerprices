@@ -1,0 +1,67 @@
+# Builds the site and publishes it to GitHub Pages.
+#
+# Runs once a day after Octopus has published the day's last Agile prices
+# (they arrive around 16:00 UK time), on every push to main, and on demand.
+# The build reads the committed data/ store, fetches only the days that
+# aren't final yet, and commits the updated store back, so the repo is the
+# database. A push made with GITHUB_TOKEN doesn't trigger workflows, so the
+# data commit can't loop.
+
+name: Build and deploy
+
+on:
+  schedule:
+    # 16:45 UTC is 17:45 BST in summer and 16:45 GMT in winter: always after 16:00 UK.
+    - cron: '45 16 * * *'
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build site
+        run: node src/build.mjs
+
+      - name: Commit updated data store
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data
+          if git diff --cached --quiet; then
+            echo "Data store unchanged"
+          else
+            git commit -m "Update price data to $(date -u +%Y-%m-%d)"
+            git pull --rebase
+            git push
+          fi
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,8 @@
+{
+  "name": "powerprices",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node src/build.mjs"
+  }
+}

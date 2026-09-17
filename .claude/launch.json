@@ -1,0 +1,10 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "powerprices",
+      "url": "http://localhost:8766",
+      "port": 8766
+    }
+  ]
+}
