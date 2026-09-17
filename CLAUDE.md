@@ -20,6 +20,13 @@ Builds all 14 regions. A warm build (store present) fetches one day per region a
 
 `dist/` is served on http://localhost:8766 by the port LaunchAgent (see `/Users/paul.annett/schemes/PORTS.md`). `.claude/launch.json` attaches to it.
 
+## Hosting
+
+- Repo: https://github.com/octopuxltd/powerprices (public; GitHub Pages needs that on the free plan). Live at https://powerprices.co.uk via GitHub Pages with the Actions source.
+- `.github/workflows/build.yml` runs on push to main, on demand, and daily at 16:45 UTC. It builds, commits any change to `data/` back to main, and deploys `dist/`. The build writes `dist/CNAME` for the custom domain.
+- DNS is at Porkbun: four A and four AAAA records at the apex pointing at GitHub Pages, `www` CNAME to `octopuxltd.github.io`. The Porkbun API can edit them even though the dashboard's per-domain "API access" flag reads off.
+- To force a deploy: `cd /Users/paul.annett/schemes/powerprices && gh workflow run build.yml`.
+
 ## Data facts
 
 - The unit-rates endpoint is public; no API key is needed.

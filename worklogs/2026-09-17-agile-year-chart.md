@@ -1,8 +1,9 @@
 # Agile year chart (powerprices.co.uk) — worklog
-_Updated: 2026-09-17 15:35_
+_Updated: 2026-09-17 16:10_
 **Status:** complete
 
 ## Milestones (append-only)
+- 2026-09-17 16:10 — live at http://powerprices.co.uk. Repo `octopuxltd/powerprices` (public), GitHub Pages via Actions, daily build at 16:45 UTC commits `data/` back. Porkbun DNS: parking ALIAS + wildcard removed, 4 A + 4 AAAA at apex, `www` CNAME. HTTPS enforcement pending GitHub's certificate. Pill layer order pinned with `z-index` on `::view-transition-group()`.
 - 2026-09-17 15:35 — key moved above the chart; explanatory sentences dropped from the lede; every switcher label got its own `view-transition-name` (inline, `range-label-*` / `region-label-*`) so the sliding pill's layer stacks below the labels. Layer order couldn't be probed in the preview pane (transitions abort with InvalidStateError there); follows from the spec's paint-order rule, needs Paul's eyes.
 - 2026-09-17 15:20 — intro paragraph height fixed via a hidden ghost copy with the longest region name (grid-cell overlay, `.lede-box`), so the chart no longer jumps between regions; month labels centred in each month's span, with a fit rule that drops the year or the label when a span is too narrow (`monthLabel()` in `chart.mjs`).
 - 2026-09-17 15:00 — switcher highlight moved to a `::before` layer so only the pill background slides between labels; plot's left axis line drawn on the sticky y-axis column (`.y-axis::after`, spans `--plot-top` to `--plot-bottom`).
@@ -56,6 +57,8 @@ Chart styling: average bar in blue, faint range line min→max, 2px horizontal m
 - **In-place switching is a JS enhancement on top of real links** (`src/switcher.js`): fetch the target page, swap `<main>` and `<title>`, `pushState`, `startViewTransition` where available; popstate re-fetches. Links keep the `#daily-prices` anchor for the no-JS path; the script strips it from the recorded URL. This is the one place the site uses client-side JS, justified because the CSS-only route was tried and failed (see Dead ends).
 - **Region hover cards** are HTML `<span class="tip">` inside each pill, shown on `:hover` and `:focus-visible`, with the region name and the same four figures as the stat tiles, for the current range. Needs every region's stats before any page renders, hence the two-phase build. First/last three pills anchor the card to their edge so it can't run off screen.
 - **Sticky y-axis**: `.y-axis` is `position: sticky; left: 0` inside the horizontal scroller, with the surface colour as background.
+- **Hosting: GitHub Pages + Actions, repo public.** Free-plan Pages needs a public repo; the code and data are public anyway. Cron at 16:45 UTC (always after 16:00 UK in both GMT and BST). The workflow commits `data/` with GITHUB_TOKEN, which can't trigger another run, so no loop. `dist/CNAME` is written by the build because Pages reads the custom domain from the artifact. Rejected: Cloudflare Pages (no scheduler of its own; second vendor for nothing).
+- **Switcher pill stacking during a transition** is pinned with `::view-transition-group(*) { z-index: 1 }` and the two pill groups at 0. Paint-order stacking alone put the pill above labels when moving one way and below the other (Paul saw it flip by direction).
 - **Min width for the scroll container scales with the day count** (`max(720px, days × 2px)`), so the 717-day page stays legible on a phone by scrolling.
 
 ## Dead ends
@@ -78,7 +81,7 @@ Chart styling: average bar in blue, faint range line min→max, 2px horizontal m
 - The preview pane is narrower than the chart's 720px minimum, so the chart scrolls sideways there. That's intended for phones, not a bug.
 
 ## Open questions
-- **Hosting and daily refresh.** Paul asked (17 Sep) for the easiest way to host and store the data. Recommendation: GitHub Pages with a GitHub Actions workflow on a daily cron (after 16:00 UK, when the day's last prices are in). The workflow runs `node src/build.mjs`, commits the updated `data/` back to the repo (the JSON store is the database; nothing else needed), and deploys `dist/` to Pages. Alternative: Cloudflare Pages (nicer CDN, custom-domain handling) but it has no cron of its own, so it would still need Actions or a scheduled deploy hook; not worth the second vendor for this. Blocks: nothing locally. Waiting on Paul to say go, then: `git init`, a `.gitignore` for `dist/`, the workflow file, custom domain powerprices.co.uk on Pages.
+None open.
 - **Other regions.** The build takes a region argument, but the page only shows one. If powerprices.co.uk should cover the whole country, the template needs a region picker (one page per region, static links, same pattern as the range switcher). Not started.
 
 ## Next step
