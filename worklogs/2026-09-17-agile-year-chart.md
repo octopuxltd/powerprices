@@ -3,6 +3,7 @@ _Updated: 2026-09-17 16:30_
 **Status:** complete
 
 ## Milestones (append-only)
+- 2026-09-17 20:00 — favicon from Paul's SVG (pink bolt-in-circle, #FF3DFF): SVG + ICO + Apple touch + manifest icons generated in `src/icons/`, copied to the site root by the build. Heading is now fixed ("Agile Octopus price tracker"); intro dates show the year once when shared, no full stop.
 - 2026-09-17 19:40 — the region name in the intro sentence is an inline `<select>` (names only, driven by the existing `.switcher-select` handler in `switcher.js`); the plain name is kept in the markup and shown when `.js` is absent. Referral box: bold offer, Octopus blue link (`--link`), 14px, two lines.
 - 2026-09-17 19:15 — intro is a 50/50 grid on desktop (≥52rem): title + description left, Octopus referral box right (pink wash via `color-mix`, link share.octopus.energy/ore-dodo-899). Stacks below 52rem.
 - 2026-09-17 19:00 — "Previous year's trend": cyan (`--prev: #00c8f8`, Octopus's cyan token) 30-day smoothed line from exactly a year before each day, toggled by a checkbox in the key with pure CSS (`.chart-section:has(#prev-year:checked)`). Hidden on pages with nothing to compare (2024). `switcher.js` carries the checkbox state across in-place swaps. Smoothing is computed once over each region's whole store (`smoothedAverages`) and looked up by `previousYearDate()` (29 Feb → 28 Feb).
