@@ -7,7 +7,7 @@ import { mkdir, readdir, readFile, writeFile, copyFile } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
-import { fetchUnitRates, tariffCode } from './lib/octopus.mjs';
+import { fetchUnitRates, tariffCode, PRODUCT } from './lib/octopus.mjs';
 import { dailySummary, periodStats, londonDate, londonMidnight, addDays } from './lib/aggregate.mjs';
 import { loadDays, saveDays, firstDayToFetch, mergeDays } from './lib/store.mjs';
 import { renderChart, smoothedAverages } from './lib/chart.mjs';
@@ -215,7 +215,7 @@ function renderPage({ template, groups, region, range, days, dataDays, startIso,
       previousYear,
     }),
     tableRows,
-    tariff: tariffCode(region.code),
+    product: PRODUCT,
     updatedIso: now.toISOString(),
     updated: longDateTime(now),
   });
