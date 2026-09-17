@@ -70,7 +70,7 @@ async function main() {
     const allDays = mergeDays(stored, fresh, fromIso);
     console.log(`  ${region.code} ${region.name}: fetched ${fresh.length} day(s) from ${fromIso}, ${allDays.length} days stored`);
 
-    await saveDays(DATA, region.code, tariffCode(region.code), allDays, now.toISOString());
+    await saveDays(DATA, region.code, tariffCode(region.code), allDays, todayIso);
 
     const byRange = new Map();
     for (const range of groups.flat()) {
@@ -87,11 +87,20 @@ async function main() {
     return { region, byRange };
   });
 
+  // Every chart shares one y scale, spanning the lowest and highest price in
+  // the whole dataset, so a quiet 90 days isn't stretched to look dramatic.
+  const allDataDays = summaries.flatMap((s) => s.byRange.get(groups.flat().find((r) => r.kind === 'all')).dataDays);
+  const extent = {
+    min: Math.min(...allDataDays.map((d) => d.min)),
+    max: Math.max(...allDataDays.map((d) => d.max)),
+  };
+  console.log(`Y axis covers ${pence(extent.min)} to ${pence(extent.max)} on every page`);
+
   // Phase 2: render one page per region × range.
   for (const { region, byRange } of summaries) {
     for (const range of groups.flat()) {
       const regionStats = new Map(summaries.map((s) => [s.region.code, s.byRange.get(range)]));
-      const html = renderPage({ template, groups, region, range, ...byRange.get(range), regionStats, now });
+      const html = renderPage({ template, groups, region, range, ...byRange.get(range), regionStats, extent, now });
 
       const dir = path.join(DIST, pageHref(region, range));
       await mkdir(dir, { recursive: true });

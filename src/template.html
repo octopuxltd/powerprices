@@ -11,7 +11,7 @@
   <script type="module" src="/switcher.js?v={{buildId}}"></script>
 </head>
 <body>
-  <header class="site-header measure">
+  <header class="site-header">
     <a class="wordmark" href="/">powerprices<span class="tld">.co.uk</span></a>
   </header>
 
@@ -44,9 +44,8 @@
         </nav>
       </div>
       <ul class="key" aria-label="How to read the chart">
-        <li><span class="swatch bar"></span>Daily average</li>
-        <li><span class="swatch marker max"></span>Dearest half-hour</li>
-        <li><span class="swatch marker min"></span>Cheapest half-hour</li>
+        <li><span class="swatch dot"></span>Daily average</li>
+        <li><span class="swatch marker"></span>Cheapest and dearest half-hour</li>
         <li><span class="swatch negative"></span>Negative price (you’re paid to use power)</li>
       </ul>
       <div class="chart-scroll">
@@ -71,7 +70,7 @@
     </section>
   </main>
 
-  <footer class="site-footer measure">
+  <footer class="site-footer">
     <p>Prices include VAT, in pence per kWh. Data from the <a href="https://developer.octopus.energy/" rel="noreferrer">Octopus Energy API</a>, tariff {{tariff}} · Updated <time datetime="{{updatedIso}}">{{updated}}</time></p>
   </footer>
 </body>

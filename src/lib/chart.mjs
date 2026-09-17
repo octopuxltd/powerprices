@@ -34,17 +34,20 @@ function weekday(iso) {
 
 /**
  * @param {Array} days daily summaries, oldest first
- * @param {{xLabels?: 'week' | 'month'}} [options] x-axis labelling; defaults to weekly for short ranges
+ * @param {object} [options]
+ * @param {'week' | 'month'} [options.xLabels] x-axis labelling; defaults to weekly for short ranges
+ * @param {{min: number, max: number}} [options.extent] price range the y axis must cover;
+ *   pass the extremes of the whole dataset so every page shares one scale
  */
-export function renderChart(days, { xLabels } = {}) {
+export function renderChart(days, { xLabels, extent } = {}) {
   const plotH = H - PAD.top - PAD.bottom;
   const n = days.length;
 
   // Calendar-year pages pad the list with { empty: true } placeholders so the
   // axis spans the whole year; those days have no marks.
   const dataDays = days.filter((d) => !d.empty);
-  const dataMin = Math.min(0, ...dataDays.map((d) => d.min));
-  const dataMax = Math.max(...dataDays.map((d) => d.max));
+  const dataMin = Math.min(0, extent?.min ?? 0, ...dataDays.map((d) => d.min));
+  const dataMax = Math.max(extent?.max ?? -Infinity, ...dataDays.map((d) => d.max));
   const step = niceStep(dataMax - dataMin);
   const yMin = Math.floor(dataMin / step) * step;
   const yMax = Math.ceil(dataMax / step) * step;
@@ -52,10 +55,14 @@ export function renderChart(days, { xLabels } = {}) {
   const y = (v) => PAD.top + ((yMax - v) / (yMax - yMin)) * plotH;
   const slot = 100 / n; // percent of width per day
   const x = (i) => i * slot;
-  // Bars take just over half the slot; markers a little wider so they read as
-  // a cap. Both are capped so short ranges don't produce slab-like bars.
-  const barW = Math.min(slot * 0.55, 1.6);
-  const tickW = Math.min(slot * 0.8, barW + 0.5);
+  // End markers are a little narrower than the column so they read as caps.
+  const tickW = slot * 0.8;
+  // The average dot is exactly the column's width. A <circle> can't take a
+  // percentage radius (SVG resolves that against the diagonal), so each dot is
+  // a nested <svg> as wide as the column with a unit circle scaled to fit:
+  // its diameter tracks the column at any chart width. The box is taller than
+  // any column will be, so the width always wins and the circle stays centred.
+  const DOT_BOX = 60;
 
   const svg = [];
   const yLabels = [];
@@ -93,32 +100,28 @@ export function renderChart(days, { xLabels } = {}) {
     }
   }
 
-  // Marks for every day: range line, average bar, min/max markers.
+  // Marks for every day: range line from max to min with a tick at each end,
+  // a dot at the average, and a green overlay on any dip below zero.
   const marks = [];
   // Hover layer, one group per day: a full-height hit area plus its tooltip.
   // Kept as a separate layer *after* the marks so a tooltip paints above the
-  // bars of neighbouring days (SVG has no z-index; document order decides).
+  // marks of neighbouring days (SVG has no z-index; document order decides).
   const hover = [];
 
   days.forEach((d, i) => {
     if (d.empty) return;
     const cx = x(i) + slot / 2;
     const y0 = y(0);
-    const yAvg = y(d.avg);
-    const barTop = Math.min(y0, yAvg);
-    const barH = Math.abs(y0 - yAvg);
 
     marks.push(
       `<g class="day-marks${d.min < 0 ? ' has-negative' : ''}">` +
-        // Above the bar: the rise to the day's max, in the max colour.
-        `<line class="rise" x1="${pct(cx)}" x2="${pct(cx)}" y1="${px(y(d.max))}" y2="${px(yAvg)}"/>` +
-        // Below the bar: the fall to the day's min, faint in the bar colour.
-        `<line class="range" x1="${pct(cx)}" x2="${pct(cx)}" y1="${px(yAvg)}" y2="${px(y(d.min))}"/>` +
+        `<line class="range" x1="${pct(cx)}" x2="${pct(cx)}" y1="${px(y(d.max))}" y2="${px(y(d.min))}"/>` +
         // The dip below zero is drawn again in solid green so negative days stand out.
         (d.min < 0 ? `<line class="dip" x1="${pct(cx)}" x2="${pct(cx)}" y1="${px(y0)}" y2="${px(y(d.min))}"/>` : '') +
-        `<rect class="avg" x="${pct(cx - barW / 2)}" y="${px(barTop)}" width="${pct(barW)}" height="${px(barH)}"/>` +
         `<line class="marker max" x1="${pct(cx - tickW / 2)}" x2="${pct(cx + tickW / 2)}" y1="${px(y(d.max))}" y2="${px(y(d.max))}"/>` +
         `<line class="marker min" x1="${pct(cx - tickW / 2)}" x2="${pct(cx + tickW / 2)}" y1="${px(y(d.min))}" y2="${px(y(d.min))}"/>` +
+        `<svg class="dot" x="${pct(x(i))}" y="${px(y(d.avg) - DOT_BOX / 2)}" width="${pct(slot)}" height="${DOT_BOX}" ` +
+        `viewBox="0 0 2 2" preserveAspectRatio="xMidYMid meet"><circle class="avg" cx="1" cy="1" r="1"/></svg>` +
         `</g>`,
     );
 

@@ -300,16 +300,16 @@ h1 {
 
 .chart .axis { fill: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; }
 
-/* Range line is deliberately faint: 365 of them side by side would otherwise
-   read as a solid block and hide the average bars. */
-.chart .range { stroke: var(--series); stroke-width: 1; opacity: 0.28; }
-.chart .rise { stroke: var(--max); stroke-width: 1; opacity: 0.5; }
+/* The range line and both end markers share the dark blue, kept faint so 365
+   of them side by side don't read as a solid block. The average dot sits on
+   top in the brand pink at full strength. */
+.chart .range { stroke: var(--max); stroke-width: 1; opacity: 0.3; }
+.chart .marker { stroke: var(--max); stroke-width: 2; opacity: 0.3; }
+.chart .dot { overflow: visible; }
 .chart .avg { fill: var(--series); }
-.chart .marker { stroke: var(--series); stroke-width: 2; }
-.chart .marker.max { stroke: var(--max); opacity: 0.5; }
 /* Negative days: the dip below zero and its marker are heavier and green so they read at a glance. */
 .chart .dip { stroke: var(--good); stroke-width: 2.5; }
-.chart .has-negative .marker.min { stroke: var(--good); stroke-width: 3; }
+.chart .has-negative .marker.min { stroke: var(--good); stroke-width: 3; opacity: 1; }
 
 /* Hover layer: no JS. Each day has a full-height hit area; hovering it tints
    the column and reveals that day's tooltip (built into the SVG at build time). */
@@ -343,14 +343,13 @@ h1 {
 }
 .key li { display: inline-flex; align-items: center; gap: 0.5rem; }
 .swatch { display: inline-block; width: 14px; height: 14px; border-radius: 2px; }
-.swatch.bar { background: var(--series); width: 6px; }
+.swatch.dot { background: var(--series); width: 10px; height: 10px; border-radius: 50%; }
 /* Marker swatches are a short horizontal tick in the marker's colour. */
 .swatch.marker, .swatch.negative {
   height: 2px;
   border-radius: 1px;
 }
-.swatch.marker.max { background: var(--max); }
-.swatch.marker.min { background: var(--series); }
+.swatch.marker { background: var(--max); opacity: 0.3; }
 .swatch.negative { background: var(--good); height: 3px; }
 
 /* Table ------------------------------------------------------------------- */

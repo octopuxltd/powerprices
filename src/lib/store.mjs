@@ -3,6 +3,11 @@
 // final yet: today (its last two half-hours arrive around 16:00) and any day
 // whose stored slot count is short because an earlier build ran before then.
 // Commit data/ alongside the source: it is the site's database.
+//
+// Only final days are written, and nothing build-specific (no timestamp), so
+// a build on any machine produces byte-identical files. That matters because
+// the GitHub Actions bot commits data/ daily: if local builds also changed
+// these files, every local commit would conflict with the bot's.
 
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
@@ -22,11 +27,13 @@ export async function loadDays(dataDir, regionCode) {
   }
 }
 
-export async function saveDays(dataDir, regionCode, tariff, days, generated) {
+/** Writes the final days only; see the note at the top of the file. */
+export async function saveDays(dataDir, regionCode, tariff, days, todayIso) {
+  const finalDays = days.filter((d) => isFinal(d, todayIso));
   await mkdir(dataDir, { recursive: true });
   await writeFile(
     path.join(dataDir, `daily-${regionCode}.json`),
-    JSON.stringify({ format: FORMAT, region: regionCode, tariff, generated, days }, null, 1),
+    JSON.stringify({ format: FORMAT, region: regionCode, tariff, days: finalDays }, null, 1),
   );
 }
 

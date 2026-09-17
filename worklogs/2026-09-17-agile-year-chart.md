@@ -1,8 +1,9 @@
 # Agile year chart (powerprices.co.uk) — worklog
-_Updated: 2026-09-17 16:10_
+_Updated: 2026-09-17 16:30_
 **Status:** complete
 
 ## Milestones (append-only)
+- 2026-09-17 16:30 — marks redesigned: pink dot at the average (radius = old half bar width, floor 1.5px), single navy range line max→min with navy ticks at both ends, all at 50%; green dip overlay unchanged. Header and footer now full width (the `.measure` on them double-counted the gutter and made them narrower than everything else).
 - 2026-09-17 16:10 — live at http://powerprices.co.uk. Repo `octopuxltd/powerprices` (public), GitHub Pages via Actions, daily build at 16:45 UTC commits `data/` back. Porkbun DNS: parking ALIAS + wildcard removed, 4 A + 4 AAAA at apex, `www` CNAME. HTTPS enforcement pending GitHub's certificate. Pill layer order pinned with `z-index` on `::view-transition-group()`.
 - 2026-09-17 15:35 — key moved above the chart; explanatory sentences dropped from the lede; every switcher label got its own `view-transition-name` (inline, `range-label-*` / `region-label-*`) so the sliding pill's layer stacks below the labels. Layer order couldn't be probed in the preview pane (transitions abort with InvalidStateError there); follows from the spec's paint-order rule, needs Paul's eyes.
 - 2026-09-17 15:20 — intro paragraph height fixed via a hidden ghost copy with the longest region name (grid-cell overlay, `.lede-box`), so the chart no longer jumps between regions; month labels centred in each month's span, with a fit rule that drops the year or the label when a span is too narrow (`monthLabel()` in `chart.mjs`).
@@ -59,6 +60,8 @@ Chart styling: average bar in blue, faint range line min→max, 2px horizontal m
 - **Sticky y-axis**: `.y-axis` is `position: sticky; left: 0` inside the horizontal scroller, with the surface colour as background.
 - **Hosting: GitHub Pages + Actions, repo public.** Free-plan Pages needs a public repo; the code and data are public anyway. Cron at 16:45 UTC (always after 16:00 UK in both GMT and BST). The workflow commits `data/` with GITHUB_TOKEN, which can't trigger another run, so no loop. `dist/CNAME` is written by the build because Pages reads the custom domain from the artifact. Rejected: Cloudflare Pages (no scheduler of its own; second vendor for nothing).
 - **Switcher pill stacking during a transition** is pinned with `::view-transition-group(*) { z-index: 1 }` and the two pill groups at 0. Paint-order stacking alone put the pill above labels when moving one way and below the other (Paul saw it flip by direction).
+- **The store holds final days only and no timestamp**, so any build anywhere writes byte-identical files. Learned the hard way: the first local commit after the bot's daily data commit conflicted in all 14 JSON files, because both sides had rewritten `generated` and today's partial day. Today is refetched on every build instead (one day per region, trivial).
+- **One y scale for every page**: the build finds the lowest and highest price across all regions and all days and passes it to `renderChart` as `extent`. A 90-day page with a quiet range no longer looks dramatic. Paul's ask: "always go up to the highest point any data reaches".
 - **Min width for the scroll container scales with the day count** (`max(720px, days × 2px)`), so the 717-day page stays legible on a phone by scrolling.
 
 ## Dead ends
