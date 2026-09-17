@@ -20,13 +20,26 @@ export const REGIONS = [
   { code: 'P', name: 'Northern Scotland' },
 ];
 
-// Brighton's region lives at the site root; every other region sits under
-// its lowercase letter, so existing URLs keep working.
-export const DEFAULT_REGION = 'J';
+// URL scheme: London lives at the site root; every other region sits under
+// its name as a slug ("/yorkshire/", "/south-western-england/2025/"). The
+// single-letter form ("/m/") and the default region's name form ("/london/")
+// both exist as instant redirects to the canonical page, so links shared
+// before the scheme changed keep working.
+export const DEFAULT_REGION = 'C';
 
-/** Absolute URL path for a region + range page, e.g. "/", "/a/90-days/". */
+for (const r of REGIONS) r.slug = r.name.toLowerCase().replace(/[^a-z]+/g, '-');
+
+/** Canonical absolute path for a region + range page, e.g. "/", "/london/90-days/". */
 export function pageHref(region, range) {
-  const regionPart = region.code === DEFAULT_REGION ? '' : `${region.code.toLowerCase()}/`;
+  const regionPart = region.code === DEFAULT_REGION ? '' : `${region.slug}/`;
   const rangePart = range.slug ? `${range.slug}/` : '';
   return `/${regionPart}${rangePart}`;
+}
+
+/** Other paths that should redirect to the canonical page. */
+export function aliasHrefs(region, range) {
+  const rangePart = range.slug ? `${range.slug}/` : '';
+  const aliases = [`/${region.code.toLowerCase()}/${rangePart}`];
+  if (region.code === DEFAULT_REGION) aliases.push(`/${region.slug}/${rangePart}`);
+  return aliases;
 }

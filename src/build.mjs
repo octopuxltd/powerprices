@@ -13,7 +13,7 @@ import { loadDays, saveDays, firstDayToFetch, mergeDays } from './lib/store.mjs'
 import { renderChart } from './lib/chart.mjs';
 import { longDate, longDateTime, pence, escapeHtml } from './lib/format.mjs';
 import { PRODUCT_START, rangeGroups, selectDays } from './lib/ranges.mjs';
-import { REGIONS, pageHref } from './lib/regions.mjs';
+import { REGIONS, pageHref, aliasHrefs } from './lib/regions.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SRC = path.join(ROOT, 'src');
@@ -97,19 +97,30 @@ async function main() {
   };
   console.log(`Y axis covers ${pence(extent.min)} to ${pence(extent.max)} on every page`);
 
-  // Phase 2: render one page per region × range.
+  // Phase 2: render one page per region × range, plus a redirect stub at each
+  // alias path (GitHub Pages can't do server-side redirects).
+  const redirect = await readFile(path.join(SRC, 'redirect.html'), 'utf8');
+  let stubs = 0;
   for (const { region, byRange } of summaries) {
     for (const range of groups.flat()) {
       const regionStats = new Map(summaries.map((s) => [s.region.code, s.byRange.get(range)]));
       const html = renderPage({ template, groups, region, range, ...byRange.get(range), regionStats, extent, now });
 
-      const dir = path.join(DIST, pageHref(region, range));
+      const href = pageHref(region, range);
+      const dir = path.join(DIST, href);
       await mkdir(dir, { recursive: true });
       await writeFile(path.join(dir, 'index.html'), html);
+
+      for (const alias of aliasHrefs(region, range)) {
+        const aliasDir = path.join(DIST, alias);
+        await mkdir(aliasDir, { recursive: true });
+        await writeFile(path.join(aliasDir, 'index.html'), fill(redirect, { target: href }));
+        stubs += 1;
+      }
     }
   }
 
-  console.log(`Wrote ${regionsToBuild.length * groups.flat().length} pages to ${path.relative(ROOT, DIST)}/`);
+  console.log(`Wrote ${regionsToBuild.length * groups.flat().length} pages and ${stubs} redirects to ${path.relative(ROOT, DIST)}/`);
 }
 
 function renderPage({ template, groups, region, range, days, dataDays, startIso, endIso, stats, regionStats, extent, now }) {
