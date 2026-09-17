@@ -11,7 +11,7 @@ import { fetchUnitRates, tariffCode } from './lib/octopus.mjs';
 import { dailySummary, periodStats, londonDate, londonMidnight, addDays } from './lib/aggregate.mjs';
 import { loadDays, saveDays, firstDayToFetch, mergeDays } from './lib/store.mjs';
 import { renderChart, smoothedAverages } from './lib/chart.mjs';
-import { longDate, longDateTime, pence, escapeHtml } from './lib/format.mjs';
+import { longDate, longDateTime, dateRange, pence, escapeHtml } from './lib/format.mjs';
 import { PRODUCT_START, rangeGroups, selectDays } from './lib/ranges.mjs';
 import { REGIONS, pageHref, aliasHrefs } from './lib/regions.mjs';
 
@@ -200,8 +200,8 @@ function renderPage({ template, groups, region, range, days, dataDays, startIso,
     regionSelect,
     rangeSelect,
     regionName: escapeHtml(region.name),
-    lede: ledeText(region, longDate(startIso), longDate(endIso), regionSelect),
-    ledeGhost: ledeText(longestRegion, '28 Sep 2026', '28 Sep 2026'),
+    lede: ledeText(region, startIso, endIso, regionSelect),
+    ledeGhost: ledeText(longestRegion, '2025-09-28', '2026-09-28'), // two years: the widest form
     stats: statsHtml,
     // Calendar years always get month labels, even the short first one (Oct to Dec 2024).
     chart: renderChart(days, { xLabels: range.kind === 'year' ? 'month' : undefined, extent, previousYear }),
@@ -230,14 +230,14 @@ function negativeHoursDetail(stats) {
  * the plain name stays in the markup for the no-script case (style.css swaps
  * them on the .js class). The ghost copy passes no options.
  */
-function ledeText(region, fromDate, toDate, options) {
-  const date = (d) => `<span class="nowrap">${d}</span>`;
+function ledeText(region, fromIso, toIso, options) {
+  const nowrap = (d) => `<span class="nowrap">${d}</span>`;
   const name = `${escapeHtml(region.name)} (${region.code})`;
   const regionPart = options
     ? `<span class="region-text">${name}</span>` +
       `<select class="switcher-select lede-select" aria-label="Region">${options}</select>`
     : name;
-  return `Half-hourly electricity prices for ${regionPart}<br>${date(fromDate)} to ${date(toDate)}.`;
+  return `Half-hourly electricity prices for ${regionPart}<br>${dateRange(fromIso, toIso, nowrap)}`;
 }
 
 /**

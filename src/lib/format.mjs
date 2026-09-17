@@ -9,6 +9,22 @@ export function longDate(iso) {
   return `${d} ${MONTHS[m - 1]} ${y}`;
 }
 
+/** "17 Sep" from an ISO date string (no year). */
+export function shortDate(iso) {
+  const [, m, d] = iso.split('-').map(Number);
+  return `${d} ${MONTHS[m - 1]}`;
+}
+
+/**
+ * "1 Jan to 17 Sep 2026" when both dates share a year, otherwise
+ * "18 Sep 2025 to 17 Sep 2026". `wrap` decorates each date (e.g. a nowrap span).
+ */
+export function dateRange(fromIso, toIso, wrap = (s) => s) {
+  const sameYear = fromIso.slice(0, 4) === toIso.slice(0, 4);
+  const from = sameYear ? shortDate(fromIso) : longDate(fromIso);
+  return `${wrap(from)} to ${wrap(longDate(toIso))}`;
+}
+
 /** "Sep" from an ISO date string. */
 export function monthAbbr(iso) {
   return MONTHS[Number(iso.slice(5, 7)) - 1];
