@@ -79,6 +79,7 @@ Chart styling: average bar in blue, faint range line min→max, 2px horizontal m
 - Build: `cd /Users/paul.annett/schemes/powerprices && node src/build.mjs`
 
 ## Gotchas
+- The shared y `extent` was computed in `main()` and passed to `renderPage()`, but `renderPage` didn't destructure it or pass it on to `renderChart`, so each page still picked its own top. Region J rounded to 100p by luck; region M stopped at 80p. When threading a new option through, grep for it at every hop.
 - SVG `<text>` positions by baseline, so stacking lines at `y = pad + line × n` leaves a big gap above and none below. The tooltips set `dominant-baseline: central` and put `y` at each row's centre. Measure top and bottom gaps with `getBBox()` rather than trusting the padding maths.
 - Octopus API `page_size` maxes at 1500; results come newest-first. Follow `next` links.
 - Agile publishes each day's prices for 23:00 to 23:00 UK time, so today's last two half-hours (23:00 to 00:00) only appear around 16:00. A build earlier in the day sees 46 slots for today; the day's figures are over what's published so far. Clock-change days have 46 and 50 slots.

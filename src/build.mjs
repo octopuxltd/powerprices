@@ -88,14 +88,12 @@ async function main() {
   });
 
   // Every chart shares one y scale, spanning the lowest and highest price in
-  // the whole dataset, so a quiet 90 days isn't stretched to look dramatic.
-  // The top is never below Agile's price cap (100p/kWh inc. VAT, seen as the
-  // dataset maximum), so the axis reads the same even on a build of one region.
-  const AGILE_CAP = 100;
+  // the whole dataset (all regions, all days), so a quiet 90 days isn't
+  // stretched to look dramatic, and a new record high moves every axis at once.
   const allDataDays = summaries.flatMap((s) => s.byRange.get(groups.flat().find((r) => r.kind === 'all')).dataDays);
   const extent = {
     min: Math.min(...allDataDays.map((d) => d.min)),
-    max: Math.max(AGILE_CAP, ...allDataDays.map((d) => d.max)),
+    max: Math.max(...allDataDays.map((d) => d.max)),
   };
   console.log(`Y axis covers ${pence(extent.min)} to ${pence(extent.max)} on every page`);
 
