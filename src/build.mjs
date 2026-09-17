@@ -153,6 +153,16 @@ function renderPage({ template, groups, region, range, days, dataDays, startIso,
     )
     .join('<span class="divider" role="separator"></span>');
 
+  // Phone-sized screens get <select>s instead of pills (see style.css). They
+  // navigate via switcher.js, so they're only shown when the script has run.
+  const regionSelect = REGIONS.map(
+    (r) => `<option value="${pageHref(r, range)}"${r === region ? ' selected' : ''}>${escapeHtml(r.name)} (${r.code})</option>`,
+  ).join('');
+  const rangeSelect = groups
+    .flat()
+    .map((r) => `<option value="${pageHref(region, r)}"${r === range ? ' selected' : ''}>${r.label}</option>`)
+    .join('');
+
   const statsHtml = [
     tile('Average price', pence(stats.avg), `across ${dataDays.length} days`),
     tile('Cheapest half-hour', pence(stats.cheapest.incVat), longDateTime(stats.cheapest.from), { nowrap: true }),
@@ -182,6 +192,8 @@ function renderPage({ template, groups, region, range, days, dataDays, startIso,
     rangeTitle: range.title,
     rangeNav,
     regionNav,
+    regionSelect,
+    rangeSelect,
     regionName: escapeHtml(region.name),
     lede: ledeText(region, longDate(startIso), longDate(endIso)),
     ledeGhost: ledeText(longestRegion, '28 Sep 2026', '28 Sep 2026'),

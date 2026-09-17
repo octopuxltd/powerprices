@@ -104,12 +104,15 @@ h1 {
 
 /* Stat tiles -------------------------------------------------------------- */
 
+/* Four across, then 2×2, then a single column: never a row of three plus one. */
 .stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 1rem;
   margin-block: 0 2rem;
 }
+@media (max-width: 52rem) { .stats { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 27rem) { .stats { grid-template-columns: 1fr; } }
 
 .stat {
   background: var(--surface);
@@ -166,9 +169,12 @@ h1 {
 /* Switchers (region, time range): plain links styled as a segmented control. */
 .switcher {
   display: inline-flex;
+  flex-wrap: wrap; /* 14 region pills don't fit a phone in one row */
   padding: 3px;
   border: 1px solid var(--border);
-  border-radius: 999px;
+  /* A fixed radius rather than 999px, so a wrapped two-row control reads as
+     a rounded box instead of a squashed pill. One row still looks pill-shaped. */
+  border-radius: 1.2rem;
   background: color-mix(in srgb, var(--ink) 4%, transparent);
 }
 .switcher a {
@@ -203,13 +209,45 @@ h1 {
 }
 .switcher-group {
   display: inline-flex;
+  flex-wrap: wrap; /* label sits above the pills when there's no room beside them */
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.5rem 0.75rem;
 }
 .switcher-label {
   color: var(--ink-2);
   font-size: 0.875rem;
   white-space: nowrap;
+}
+
+/* Phone drop-downs. Hidden by default; shown in place of the pills on narrow
+   screens once the inline script has stamped .js on <html> (they navigate via
+   switcher.js, so without it phones keep the wrapping pills instead). */
+.selects { display: none; }
+@media (max-width: 40rem) {
+  .js .switcher-group,
+  .js .switcher.ranges { display: none; }
+  .js .selects {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    width: 100%;
+  }
+}
+.select-field {
+  display: grid;
+  gap: 0.25rem;
+  color: var(--ink-2);
+  font-size: 0.8125rem;
+}
+.switcher-select {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 1rem; /* 16px stops iOS zooming the page when the control is focused */
 }
 
 /* Region pills are single letters, so tighten them to keep all 14 on one row. */
@@ -255,9 +293,13 @@ h1 {
 .chart-wrap {
   display: grid;
   grid-template-columns: 2.5rem 1fr;
-  /* Bars need about 2px each to stay legible; below that the chart scrolls sideways. */
+  /* Marks need about 2px each to stay legible; below that the chart scrolls sideways. */
   min-width: max(720px, calc(var(--days, 365) * 2px));
   font-family: var(--font);
+}
+/* Phones never scroll sideways: the chart compresses to the screen instead. */
+@media (max-width: 40rem) {
+  .chart-wrap { min-width: 0; }
 }
 .y-axis {
   /* Sticks to the left edge while the chart scrolls sideways on narrow screens;

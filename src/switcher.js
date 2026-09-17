@@ -51,6 +51,17 @@ document.addEventListener('click', (event) => {
   });
 });
 
+// Phone drop-downs: each option's value is the page path.
+document.addEventListener('change', (event) => {
+  const select = event.target.closest('.switcher-select');
+  if (!select) return;
+  const target = new URL(select.value, location.href);
+  target.hash = '';
+  swapTo(target.href, { push: true }).catch(() => {
+    location.href = select.value;
+  });
+});
+
 window.addEventListener('popstate', () => {
   swapTo(location.href, { push: false }).catch(() => location.reload());
 });

@@ -9,6 +9,8 @@
   <meta name="description" content="Octopus Agile electricity prices for {{regionName}}, day by day: average, minimum and maximum price for each day.">
   <link rel="stylesheet" href="/style.css?v={{buildId}}">
   <script type="module" src="/switcher.js?v={{buildId}}"></script>
+  <!-- Runs before first paint so the phone drop-downs (which need the script) show without a flash of pills. -->
+  <script>document.documentElement.classList.add('js');</script>
 </head>
 <body>
   <header class="site-header">
@@ -44,6 +46,10 @@
         <nav class="switcher ranges" aria-label="Time range">
           {{rangeNav}}
         </nav>
+        <div class="selects">
+          <label class="select-field">Region<select class="switcher-select" aria-label="Region">{{regionSelect}}</select></label>
+          <label class="select-field">Period<select class="switcher-select" aria-label="Time range">{{rangeSelect}}</select></label>
+        </div>
       </div>
       <ul class="key" aria-label="How to read the chart">
         <li><span class="swatch dot"></span>Daily average</li>
