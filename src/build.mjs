@@ -146,7 +146,7 @@ function renderPage({ template, groups, region, range, days, dataDays, startIso,
     tile('Average price', pence(stats.avg), `across ${dataDays.length} days`),
     tile('Cheapest half-hour', pence(stats.cheapest.incVat), longDateTime(stats.cheapest.from)),
     tile('Dearest half-hour', pence(stats.dearest.incVat), longDateTime(stats.dearest.from)),
-    tile('Negative-price half-hours', String(stats.negativeSlots), `on ${stats.negativeDays} ${stats.negativeDays === 1 ? 'day' : 'days'}`),
+    tile('Negative-price half-hours', String(stats.negativeSlots), negativeDaysDetail(stats.negativeDays, dataDays.length)),
   ].join('\n');
 
   const tableRows = dataDays
@@ -178,6 +178,14 @@ function renderPage({ template, groups, region, range, days, dataDays, startIso,
     updatedIso: now.toISOString(),
     updated: longDateTime(now),
   });
+}
+
+/** "on 28 days · one every 9 days on average" */
+function negativeDaysDetail(negativeDays, totalDays) {
+  if (negativeDays === 0) return 'none in this period';
+  const every = Math.round(totalDays / negativeDays);
+  const rate = every <= 1 ? 'most days' : `one every ${every} days on average`;
+  return `on ${negativeDays} ${negativeDays === 1 ? 'day' : 'days'} · ${rate}`;
 }
 
 function ledeText(region, fromDate, toDate) {
