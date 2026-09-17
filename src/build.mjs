@@ -145,7 +145,6 @@ function renderPage({ template, groups, region, range, days, dataDays, startIso,
   const statsHtml = [
     tile('Average price', pence(stats.avg), `across ${dataDays.length} days`),
     tile('Cheapest half-hour', pence(stats.cheapest.incVat), longDateTime(stats.cheapest.from)),
-    tile('Dearest half-hour', pence(stats.dearest.incVat), longDateTime(stats.dearest.from)),
     tile('Hours of negative pricing', hours(stats.negativeSlots), `${stats.negativeSlots} half-hour ${stats.negativeSlots === 1 ? 'slot' : 'slots'}`),
     tile('Days with a negative period', String(stats.negativeDays), `of ${dataDays.length} days`),
   ].join('\n');
@@ -203,7 +202,6 @@ function regionTooltip(region, summary) {
     lines.push(
       `<span>Average ${pence(stats.avg)} across ${dataDays.length} days</span>`,
       `<span>Cheapest ${pence(stats.cheapest.incVat)} · ${longDateTime(stats.cheapest.from)}</span>`,
-      `<span>Dearest ${pence(stats.dearest.incVat)} · ${longDateTime(stats.dearest.from)}</span>`,
       `<span${stats.negativeSlots ? ' class="tip-neg"' : ''}>${hours(stats.negativeSlots)} hours of negative pricing on ${negDays}</span>`,
     );
   }
