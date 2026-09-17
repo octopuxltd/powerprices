@@ -79,6 +79,7 @@ Chart styling: average bar in blue, faint range line min→max, 2px horizontal m
 - Build: `cd /Users/paul.annett/schemes/powerprices && node src/build.mjs`
 
 ## Gotchas
+- **Set the GitHub Pages custom domain only after DNS is live**, or clear and re-set it afterwards. Setting `cname` before the records existed left GitHub's domain check empty (`pages/health` returned `{}`) and no certificate was ever requested, for 90 minutes. Clearing the cname and setting it again made the check run immediately (`dns_resolves: true`, `is_https_eligible: true`) and started provisioning.
 - The shared y `extent` was computed in `main()` and passed to `renderPage()`, but `renderPage` didn't destructure it or pass it on to `renderChart`, so each page still picked its own top. Region J rounded to 100p by luck; region M stopped at 80p. When threading a new option through, grep for it at every hop.
 - SVG `<text>` positions by baseline, so stacking lines at `y = pad + line × n` leaves a big gap above and none below. The tooltips set `dominant-baseline: central` and put `y` at each row's centre. Measure top and bottom gaps with `getBBox()` rather than trusting the padding maths.
 - Octopus API `page_size` maxes at 1500; results come newest-first. Follow `next` links.
