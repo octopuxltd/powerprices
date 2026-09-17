@@ -144,7 +144,7 @@ export function renderChart(days, { xLabels, extent } = {}) {
   );
 }
 
-const TREND_WINDOW = 7; // days each side averaged together: a gentle wave, not a trace of every dot
+const TREND_WINDOW = 30; // days averaged together (centred): a monthly wave, not a trace of every dot
 
 /**
  * A smoothed line through the daily averages. Drawn in a nested <svg> whose
