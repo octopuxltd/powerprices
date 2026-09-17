@@ -38,8 +38,10 @@ function weekday(iso) {
  * @param {'week' | 'month'} [options.xLabels] x-axis labelling; defaults to weekly for short ranges
  * @param {{min: number, max: number}} [options.extent] price range the y axis must cover;
  *   pass the extremes of the whole dataset so every page shares one scale
+ * @param {Map<string, number>} [options.previousYear] smoothed average by date for the
+ *   whole store, used to draw last year's trend under this range's days
  */
-export function renderChart(days, { xLabels, extent } = {}) {
+export function renderChart(days, { xLabels, extent, previousYear } = {}) {
   const plotH = H - PAD.top - PAD.bottom;
   const n = days.length;
 
@@ -133,9 +135,17 @@ export function renderChart(days, { xLabels, extent } = {}) {
     );
   });
   svg.push(...marks, renderTrend(days, y, plotH), ...hover);
+  // The previous year's smoothed line, day for day, toggled by the key's checkbox.
+  let hasPrev = false;
+  if (previousYear) {
+    const values = days.map((d) => (d.empty ? null : previousYear.get(previousYearDate(d.date)) ?? null));
+    hasPrev = values.some((v) => v !== null);
+    if (hasPrev) svg.push(trendPath(values, y, plotH, 'trend prev'));
+  }
 
   return (
-    `<div class="chart-wrap" style="--days:${n};--chart-h:${H}px;--plot-top:${PAD.top}px;--plot-bottom:${PAD.bottom}px">` +
+    // no-prev lets the key hide the checkbox on pages with nothing to compare against.
+    `<div class="chart-wrap${hasPrev ? '' : ' no-prev'}" style="--days:${n};--chart-h:${H}px;--plot-top:${PAD.top}px;--plot-bottom:${PAD.bottom}px">` +
     `<div class="y-axis" aria-hidden="true">${yLabels.join('')}</div>` +
     `<svg class="chart" role="img" ` +
     `aria-label="Daily Agile prices: average bar with minimum and maximum markers for each of ${n} days">` +
@@ -147,25 +157,14 @@ export function renderChart(days, { xLabels, extent } = {}) {
 const TREND_WINDOW = 30; // days averaged together (centred): a monthly wave, not a trace of every dot
 
 /**
- * A smoothed line through the daily averages. Drawn in a nested <svg> whose
- * viewBox is one unit per day and stretched to the full width with
- * preserveAspectRatio="none", because a <path> can't take percentage
- * coordinates; vector-effect keeps the stroke from stretching with it.
- * Empty placeholder days (calendar-year padding) break the line.
+ * Centred moving average of the daily averages, one value per day (null for
+ * empty placeholder days). The window only counts days that have data.
  */
-function renderTrend(days, y, plotH) {
+export function smoothedAverages(days) {
   const n = days.length;
   const half = Math.floor(TREND_WINDOW / 2);
-  const segments = [];
-  let current = [];
-
-  days.forEach((d, i) => {
-    if (d.empty) {
-      if (current.length) segments.push(current);
-      current = [];
-      return;
-    }
-    // Centred moving average over the data days within the window.
+  return days.map((d, i) => {
+    if (d.empty) return null;
     let sum = 0;
     let count = 0;
     for (let j = Math.max(0, i - half); j <= Math.min(n - 1, i + half); j += 1) {
@@ -173,13 +172,46 @@ function renderTrend(days, y, plotH) {
       sum += days[j].avg;
       count += 1;
     }
-    current.push(`${i + 0.5} ${px(y(sum / count) - PAD.top)}`);
+    return sum / count;
+  });
+}
+
+/** The same calendar day one year earlier; 29 Feb falls back to 28 Feb. */
+export function previousYearDate(iso) {
+  const [y, m, d] = iso.split('-');
+  const day = m === '02' && d === '29' ? '28' : d;
+  return `${Number(y) - 1}-${m}-${day}`;
+}
+
+/** The smoothed line through this range's own daily averages. */
+function renderTrend(days, y, plotH) {
+  return trendPath(smoothedAverages(days), y, plotH, 'trend');
+}
+
+/**
+ * A line through one value per day. Drawn in a nested <svg> whose viewBox is
+ * one unit per day and stretched to the full width with
+ * preserveAspectRatio="none", because a <path> can't take percentage
+ * coordinates; vector-effect keeps the stroke from stretching with it.
+ * Null values (empty days, or no data a year earlier) break the line.
+ */
+function trendPath(values, y, plotH, className) {
+  const n = values.length;
+  const segments = [];
+  let current = [];
+  values.forEach((v, i) => {
+    if (v === null) {
+      if (current.length) segments.push(current);
+      current = [];
+      return;
+    }
+    current.push(`${i + 0.5} ${px(y(v) - PAD.top)}`);
   });
   if (current.length) segments.push(current);
 
   const d = segments.map((pts) => `M${pts.join(' L')}`).join(' ');
   return (
-    `<svg class="trend" x="0" y="${PAD.top}" width="100%" height="${plotH}" ` +
+    `<svg class="${className}" x="0" y="${PAD.top}" width="100%" height="${plotH}" ` +
     `viewBox="0 0 ${n} ${plotH}" preserveAspectRatio="none" aria-hidden="true">` +
     `<path d="${d}" vector-effect="non-scaling-stroke"/></svg>`
   );

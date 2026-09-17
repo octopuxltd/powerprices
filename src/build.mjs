@@ -10,7 +10,7 @@ import path from 'node:path';
 import { fetchUnitRates, tariffCode } from './lib/octopus.mjs';
 import { dailySummary, periodStats, londonDate, londonMidnight, addDays } from './lib/aggregate.mjs';
 import { loadDays, saveDays, firstDayToFetch, mergeDays } from './lib/store.mjs';
-import { renderChart } from './lib/chart.mjs';
+import { renderChart, smoothedAverages } from './lib/chart.mjs';
 import { longDate, longDateTime, pence, escapeHtml } from './lib/format.mjs';
 import { PRODUCT_START, rangeGroups, selectDays } from './lib/ranges.mjs';
 import { REGIONS, pageHref, aliasHrefs } from './lib/regions.mjs';
@@ -72,6 +72,11 @@ async function main() {
 
     await saveDays(DATA, region.code, tariffCode(region.code), allDays, todayIso);
 
+    // Smoothed averages over the whole store, keyed by date, so any page can
+    // look up the trend value from exactly a year before each of its days.
+    const smoothed = smoothedAverages(allDays);
+    const previousYear = new Map(allDays.map((d, i) => [d.date, smoothed[i]]));
+
     const byRange = new Map();
     for (const range of groups.flat()) {
       const days = selectDays(range, allDays); // may include empty placeholder days (calendar years)
@@ -84,7 +89,7 @@ async function main() {
         stats: periodStats(dataDays),
       });
     }
-    return { region, byRange };
+    return { region, byRange, previousYear };
   });
 
   // Every chart shares one y scale, spanning the lowest and highest price in
@@ -101,10 +106,10 @@ async function main() {
   // alias path (GitHub Pages can't do server-side redirects).
   const redirect = await readFile(path.join(SRC, 'redirect.html'), 'utf8');
   let stubs = 0;
-  for (const { region, byRange } of summaries) {
+  for (const { region, byRange, previousYear } of summaries) {
     for (const range of groups.flat()) {
       const regionStats = new Map(summaries.map((s) => [s.region.code, s.byRange.get(range)]));
-      const html = renderPage({ template, groups, region, range, ...byRange.get(range), regionStats, extent, now });
+      const html = renderPage({ template, groups, region, range, ...byRange.get(range), regionStats, extent, previousYear, now });
 
       const href = pageHref(region, range);
       const dir = path.join(DIST, href);
@@ -123,7 +128,7 @@ async function main() {
   console.log(`Wrote ${regionsToBuild.length * groups.flat().length} pages and ${stubs} redirects to ${path.relative(ROOT, DIST)}/`);
 }
 
-function renderPage({ template, groups, region, range, days, dataDays, startIso, endIso, stats, regionStats, extent, now }) {
+function renderPage({ template, groups, region, range, days, dataDays, startIso, endIso, stats, regionStats, extent, previousYear, now }) {
   // Both switchers anchor to the chart so a switch lands with the chart in
   // view rather than at the page top.
   const regionNav = REGIONS.map((r) => {
@@ -199,7 +204,7 @@ function renderPage({ template, groups, region, range, days, dataDays, startIso,
     ledeGhost: ledeText(longestRegion, '28 Sep 2026', '28 Sep 2026'),
     stats: statsHtml,
     // Calendar years always get month labels, even the short first one (Oct to Dec 2024).
-    chart: renderChart(days, { xLabels: range.kind === 'year' ? 'month' : undefined, extent }),
+    chart: renderChart(days, { xLabels: range.kind === 'year' ? 'month' : undefined, extent, previousYear }),
     tableRows,
     tariff: tariffCode(region.code),
     updatedIso: now.toISOString(),

@@ -3,6 +3,7 @@ _Updated: 2026-09-17 16:30_
 **Status:** complete
 
 ## Milestones (append-only)
+- 2026-09-17 19:00 — "Previous year's trend": cyan (`--prev: #00c8f8`, Octopus's cyan token) 30-day smoothed line from exactly a year before each day, toggled by a checkbox in the key with pure CSS (`.chart-section:has(#prev-year:checked)`). Hidden on pages with nothing to compare (2024). `switcher.js` carries the checkbox state across in-place swaps. Smoothing is computed once over each region's whole store (`smoothedAverages`) and looked up by `previousYearDate()` (29 Feb → 28 Feb).
 - 2026-09-17 18:40 — phone layout: below 40rem the pills give way to two `<select>`s (region, period) driven by `switcher.js`; they're hidden unless an inline head script has stamped `.js` on `<html>`, so no-JS phones keep wrapping pills. Chart `min-width` drops to 0 on phones (no sideways scroll). Stat tiles: 4 → 2×2 (≤52rem) → 1 column (≤27rem). Several tile-copy tweaks earlier in the hour: hours of negative pricing with per-day average, days with a negative period with a percentage, dearest tile removed, detail text wraps.
 - 2026-09-17 18:10 — region URLs are now name slugs (`/yorkshire/2025/`); letter paths and the root region's name path are meta-refresh redirect stubs (90 of them) so old links keep working. Root is now London (region C) at Paul's request; Brighton is `/south-eastern-england/`.
 - 2026-09-17 17:50 — HTTPS live on powerprices.co.uk and enforced (http → 301 https). Certificate arrived within a minute of re-saving the custom domain.

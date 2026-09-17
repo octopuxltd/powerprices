@@ -19,9 +19,16 @@ async function swapTo(url, { push }) {
   const nextMain = doc.querySelector('main');
   if (!nextMain) throw new Error('No <main> in fetched page');
 
+  // The "previous year's trend" checkbox lives inside <main>, so carry its
+  // state across the swap rather than resetting it on every switch.
+  const prevYear = document.querySelector('#prev-year');
+  const showPrevYear = prevYear ? prevYear.checked : false;
+
   const apply = () => {
     document.querySelector('main').replaceWith(nextMain);
     document.title = doc.title;
+    const nextPrevYear = nextMain.querySelector('#prev-year');
+    if (nextPrevYear) nextPrevYear.checked = showPrevYear;
     if (push) history.pushState({}, '', url);
   };
 

@@ -16,6 +16,7 @@
   /* Series colours come from octopus.energy's own CSS tokens. */
   --series: #f050f8;          /* daily average bar: Octopus brand pink */
   --max: #180048;             /* dearest half-hour marker: Octopus dark blue */
+  --prev: #00c8f8;            /* previous year's trend: Octopus cyan */
   --good: #0ca30c;            /* negative prices */
   --tip-bg: #0b0b0b;
   --tip-fg: #ffffff;
@@ -360,6 +361,12 @@ h1 {
   stroke-linecap: round;
   opacity: 0.5;
 }
+/* Last year's trend, in cyan, only while the key's checkbox is ticked. No JS:
+   the checkbox lives in the same section, so :has() can see it. */
+.chart .trend.prev { display: none; }
+.chart .trend.prev path { stroke: var(--prev); }
+.chart-section:has(#prev-year:checked) .trend.prev { display: block; }
+.chart-section:has(.chart-wrap.no-prev) .key-toggle { display: none; } /* e.g. the 2024 page */
 /* Negative days: the dip below zero and its marker are heavier and green so they read at a glance. */
 .chart .dip { stroke: var(--good); stroke-width: 2.5; }
 .chart .has-negative .marker.min { stroke: var(--good); stroke-width: 3; opacity: 1; }
@@ -398,6 +405,9 @@ h1 {
 .swatch { display: inline-block; width: 14px; height: 14px; border-radius: 2px; }
 .swatch.dot { background: var(--series); width: 10px; height: 10px; border-radius: 50%; }
 .swatch.trend { background: var(--series); opacity: 0.5; height: 2px; border-radius: 1px; }
+.swatch.trend.prev { background: var(--prev); }
+.key-toggle { display: inline-flex; align-items: center; gap: 0.5rem; cursor: pointer; }
+.key-toggle input { margin: 0; accent-color: var(--prev); }
 /* Marker swatches are a short horizontal tick in the marker's colour. */
 .swatch.marker, .swatch.negative {
   height: 2px;
