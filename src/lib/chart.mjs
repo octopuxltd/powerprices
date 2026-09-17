@@ -38,10 +38,12 @@ function weekday(iso) {
  * @param {'week' | 'month'} [options.xLabels] x-axis labelling; defaults to weekly for short ranges
  * @param {{min: number, max: number}} [options.extent] price range the y axis must cover;
  *   pass the extremes of the whole dataset so every page shares one scale
- * @param {Map<string, number>} [options.previousYear] smoothed average by date for the
- *   whole store, used to draw last year's trend under this range's days
+ * @param {Map<string, number>} [options.smoothed] smoothed average by date over the
+ *   whole store, so the trend line is continuous across page boundaries
+ * @param {Map<string, number>} [options.previousYear] the same map, looked up a year
+ *   earlier to draw last year's trend under this range's days
  */
-export function renderChart(days, { xLabels, extent, previousYear } = {}) {
+export function renderChart(days, { xLabels, extent, smoothed, previousYear } = {}) {
   const plotH = H - PAD.top - PAD.bottom;
   const n = days.length;
 
@@ -134,7 +136,13 @@ export function renderChart(days, { xLabels, extent, previousYear } = {}) {
         `</g>`,
     );
   });
-  svg.push(...marks, renderTrend(days, y, plotH), ...hover);
+  // The monthly trend. With `smoothed` (values over the whole store) the
+  // window sees days beyond this page's edges, so the line is continuous from
+  // one page to the next; without it, fall back to smoothing this range alone.
+  const trendValues = smoothed
+    ? days.map((d) => (d.empty ? null : smoothed.get(d.date) ?? null))
+    : smoothedAverages(days);
+  svg.push(...marks, trendPath(trendValues, y, plotH, 'trend'), ...hover);
   // The previous year's smoothed line, day for day, toggled by the key's checkbox.
   let hasPrev = false;
   if (previousYear) {
@@ -181,11 +189,6 @@ export function previousYearDate(iso) {
   const [y, m, d] = iso.split('-');
   const day = m === '02' && d === '29' ? '28' : d;
   return `${Number(y) - 1}-${m}-${day}`;
-}
-
-/** The smoothed line through this range's own daily averages. */
-function renderTrend(days, y, plotH) {
-  return trendPath(smoothedAverages(days), y, plotH, 'trend');
 }
 
 /**

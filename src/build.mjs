@@ -208,7 +208,12 @@ function renderPage({ template, groups, region, range, days, dataDays, startIso,
     ledeGhost: ledeText(longestRegion, '2025-09-28', '2026-09-28'), // two years: the widest form
     stats: statsHtml,
     // Calendar years always get month labels, even the short first one (Oct to Dec 2024).
-    chart: renderChart(days, { xLabels: range.kind === 'year' ? 'month' : undefined, extent, previousYear }),
+    chart: renderChart(days, {
+      xLabels: range.kind === 'year' ? 'month' : undefined,
+      extent,
+      smoothed: previousYear, // one map serves both: this year's trend, and last year's by date lookup
+      previousYear,
+    }),
     tableRows,
     tariff: tariffCode(region.code),
     updatedIso: now.toISOString(),
