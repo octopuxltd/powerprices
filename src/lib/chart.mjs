@@ -132,7 +132,7 @@ export function renderChart(days, { xLabels, extent } = {}) {
         `</g>`,
     );
   });
-  svg.push(...marks, ...hover);
+  svg.push(...marks, renderTrend(days, y, plotH), ...hover);
 
   return (
     `<div class="chart-wrap" style="--days:${n};--chart-h:${H}px;--plot-top:${PAD.top}px;--plot-bottom:${PAD.bottom}px">` +
@@ -141,6 +141,47 @@ export function renderChart(days, { xLabels, extent } = {}) {
     `aria-label="Daily Agile prices: average bar with minimum and maximum markers for each of ${n} days">` +
     svg.join('\n') +
     `</svg></div>`
+  );
+}
+
+const TREND_WINDOW = 7; // days each side averaged together: a gentle wave, not a trace of every dot
+
+/**
+ * A smoothed line through the daily averages. Drawn in a nested <svg> whose
+ * viewBox is one unit per day and stretched to the full width with
+ * preserveAspectRatio="none", because a <path> can't take percentage
+ * coordinates; vector-effect keeps the stroke from stretching with it.
+ * Empty placeholder days (calendar-year padding) break the line.
+ */
+function renderTrend(days, y, plotH) {
+  const n = days.length;
+  const half = Math.floor(TREND_WINDOW / 2);
+  const segments = [];
+  let current = [];
+
+  days.forEach((d, i) => {
+    if (d.empty) {
+      if (current.length) segments.push(current);
+      current = [];
+      return;
+    }
+    // Centred moving average over the data days within the window.
+    let sum = 0;
+    let count = 0;
+    for (let j = Math.max(0, i - half); j <= Math.min(n - 1, i + half); j += 1) {
+      if (days[j].empty) continue;
+      sum += days[j].avg;
+      count += 1;
+    }
+    current.push(`${i + 0.5} ${px(y(sum / count) - PAD.top)}`);
+  });
+  if (current.length) segments.push(current);
+
+  const d = segments.map((pts) => `M${pts.join(' L')}`).join(' ');
+  return (
+    `<svg class="trend" x="0" y="${PAD.top}" width="100%" height="${plotH}" ` +
+    `viewBox="0 0 ${n} ${plotH}" preserveAspectRatio="none" aria-hidden="true">` +
+    `<path d="${d}" vector-effect="non-scaling-stroke"/></svg>`
   );
 }
 

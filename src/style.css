@@ -307,6 +307,16 @@ h1 {
 .chart .marker { stroke: var(--max); stroke-width: 2; opacity: 0.3; }
 .chart .dot { overflow: visible; }
 .chart .avg { fill: var(--series); }
+/* Smoothed line through the averages: brand pink at half strength, over the dots. */
+.chart .trend { overflow: visible; }
+.chart .trend path {
+  fill: none;
+  stroke: var(--series);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  opacity: 0.5;
+}
 /* Negative days: the dip below zero and its marker are heavier and green so they read at a glance. */
 .chart .dip { stroke: var(--good); stroke-width: 2.5; }
 .chart .has-negative .marker.min { stroke: var(--good); stroke-width: 3; opacity: 1; }
@@ -344,6 +354,7 @@ h1 {
 .key li { display: inline-flex; align-items: center; gap: 0.5rem; }
 .swatch { display: inline-block; width: 14px; height: 14px; border-radius: 2px; }
 .swatch.dot { background: var(--series); width: 10px; height: 10px; border-radius: 50%; }
+.swatch.trend { background: var(--series); opacity: 0.5; height: 2px; border-radius: 1px; }
 /* Marker swatches are a short horizontal tick in the marker's colour. */
 .swatch.marker, .swatch.negative {
   height: 2px;
