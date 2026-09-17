@@ -9,8 +9,8 @@ export const PRODUCT_START = '2024-10-01'; // AGILE-24-10-01 available_from
 
 const ROLLING = [
   { slug: '90-days', label: 'Last 90 days', title: 'last 90 days', kind: 'rolling', days: 90 },
-  { slug: '', label: '1 year', title: 'last 365 days', kind: 'rolling', days: 365 }, // the home page
-  { slug: 'all', label: 'All', title: 'since Oct 2024', kind: 'all' },
+  { slug: '', label: '365 days', title: 'last 365 days', kind: 'rolling', days: 365 }, // the home page
+  { slug: 'all', label: 'All time', title: 'since Oct 2024', kind: 'all' },
 ];
 
 /** @param {string} todayIso YYYY-MM-DD */
