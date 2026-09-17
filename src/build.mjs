@@ -241,7 +241,7 @@ function ledeText(region, fromIso, toIso, options) {
     ? `<span class="region-text">${name}</span>` +
       `<select class="switcher-select lede-select" aria-label="Region">${options}</select>`
     : name;
-  return `Half-hourly electricity prices for ${regionPart}<br>${dateRange(fromIso, toIso, nowrap)}`;
+  return `Electricity price history for ${regionPart}<br>${dateRange(fromIso, toIso, nowrap)}`;
 }
 
 /**
