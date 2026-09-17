@@ -3,7 +3,7 @@
 // Usage: node src/build.mjs            (all regions)
 //        node src/build.mjs J          (one region, for a quick check)
 
-import { mkdir, readFile, writeFile, copyFile } from 'node:fs/promises';
+import { mkdir, readdir, readFile, writeFile, copyFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
@@ -54,6 +54,10 @@ async function main() {
   await copyFile(path.join(SRC, 'switcher.js'), path.join(DIST, 'switcher.js'));
   // GitHub Pages reads the custom domain from a CNAME file in the deployed artifact.
   await writeFile(path.join(DIST, 'CNAME'), 'powerprices.co.uk\n');
+  // Favicons and the web manifest live at the site root, where browsers look for them.
+  for (const file of await readdir(path.join(SRC, 'icons'))) {
+    await copyFile(path.join(SRC, 'icons', file), path.join(DIST, file));
+  }
 
   const groups = rangeGroups(todayIso);
 

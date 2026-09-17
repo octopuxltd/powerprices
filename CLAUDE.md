@@ -10,6 +10,7 @@ Static site showing Octopus Agile electricity prices. No framework. A Node build
 - `data/daily-<region>.json` is the site's store: every *final* day's summary since Oct 2024, one file per region, no timestamps, so a build on any machine writes identical files and never conflicts with the daily bot commit. The build reads it first and fetches only what's missing (today, and any day whose slot count was short). Commit `data/` with the source. Delete a file to force a full refetch for that region. Logic in `src/lib/store.mjs`.
 - Every chart shares one y scale: the extremes across all regions and all days, computed in `build.mjs` and passed to `renderChart` as `extent`. Purely data-driven (no fixed cap), so a new record moves every axis. Don't let a page pick its own.
 - The header and footer content sits inside a `.measure` wrapper so it aligns with the title; only the chart card breaks out to full width.
+- `src/icons/favicon.svg` is the one source icon (Paul's). The other files there (`favicon.ico` 16/32/48, `apple-touch-icon.png` 180, `icon-192.png`, `icon-512.png`, `site.webmanifest`) are generated from it with `rsvg-convert` and `magick`; the PNGs get a white background because iOS and Android paint black behind transparency. The build copies the folder to the site root. Regenerate them if the SVG changes.
 - Worklogs live in `worklogs/`.
 
 ## Build and preview
