@@ -180,11 +180,11 @@ function renderPage({ template, groups, region, range, days, dataDays, startIso,
   });
 }
 
-/** "on 28 days · one every 9 days on average" */
+/** "on 28 days · average: 1 every 9 days" */
 function negativeDaysDetail(negativeDays, totalDays) {
   if (negativeDays === 0) return 'none in this period';
   const every = Math.round(totalDays / negativeDays);
-  const rate = every <= 1 ? 'most days' : `one every ${every} days on average`;
+  const rate = every <= 1 ? 'most days' : `average: 1 every ${every} days`;
   return `on ${negativeDays} ${negativeDays === 1 ? 'day' : 'days'} · ${rate}`;
 }
 
