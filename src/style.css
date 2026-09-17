@@ -90,11 +90,11 @@ h1 {
 }
 
 .lede {
-  max-width: 44rem;
   margin: 0;
   color: var(--ink-2);
   font-size: 1.0625rem;
 }
+.nowrap { white-space: nowrap; } /* keeps a date on one line */
 /* Both copies share one grid cell: the visible lede and a hidden one with
    the longest possible wording. The cell takes the taller, so the block's
    height is the same on every page and the chart below never jumps. */

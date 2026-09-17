@@ -220,7 +220,8 @@ function negativeHoursDetail(stats) {
 }
 
 function ledeText(region, fromDate, toDate) {
-  return `Half-hourly electricity prices for ${escapeHtml(region.name)} (region ${region.code}), ${fromDate} to ${toDate}.`;
+  const date = (d) => `<span class="nowrap">${d}</span>`;
+  return `Half-hourly electricity prices for ${escapeHtml(region.name)} (region ${region.code}), ${date(fromDate)} to ${date(toDate)}.`;
 }
 
 /**
