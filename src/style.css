@@ -94,12 +94,17 @@ main > .measure { padding-inline: 0; }
 
 /* A wash of the brand pink, so it sits well on both the light and dark page. */
 .referral {
-  padding: 1.25rem 1.5rem;
+  justify-self: end; /* sits at the right edge of its half, in line with the tiles' edge */
+  max-width: 24rem;
+  padding: 0.875rem 1.125rem;
   border: 1px solid color-mix(in srgb, var(--series) 45%, transparent);
   border-radius: 0.75rem;
   background: color-mix(in srgb, var(--series) 12%, transparent);
-  font-size: 1.0625rem;
-  line-height: 1.5;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+}
+@media (max-width: 52rem) {
+  .referral { justify-self: start; }
 }
 .referral p { margin: 0; }
 .referral a { font-weight: 600; overflow-wrap: anywhere; }
