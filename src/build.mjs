@@ -89,10 +89,13 @@ async function main() {
 
   // Every chart shares one y scale, spanning the lowest and highest price in
   // the whole dataset, so a quiet 90 days isn't stretched to look dramatic.
+  // The top is never below Agile's price cap (100p/kWh inc. VAT, seen as the
+  // dataset maximum), so the axis reads the same even on a build of one region.
+  const AGILE_CAP = 100;
   const allDataDays = summaries.flatMap((s) => s.byRange.get(groups.flat().find((r) => r.kind === 'all')).dataDays);
   const extent = {
     min: Math.min(...allDataDays.map((d) => d.min)),
-    max: Math.max(...allDataDays.map((d) => d.max)),
+    max: Math.max(AGILE_CAP, ...allDataDays.map((d) => d.max)),
   };
   console.log(`Y axis covers ${pence(extent.min)} to ${pence(extent.max)} on every page`);
 
@@ -111,7 +114,7 @@ async function main() {
   console.log(`Wrote ${regionsToBuild.length * groups.flat().length} pages to ${path.relative(ROOT, DIST)}/`);
 }
 
-function renderPage({ template, groups, region, range, days, dataDays, startIso, endIso, stats, regionStats, now }) {
+function renderPage({ template, groups, region, range, days, dataDays, startIso, endIso, stats, regionStats, extent, now }) {
   // Both switchers anchor to the chart so a switch lands with the chart in
   // view rather than at the page top.
   const regionNav = REGIONS.map((r) => {
@@ -171,7 +174,7 @@ function renderPage({ template, groups, region, range, days, dataDays, startIso,
     ledeGhost: ledeText(longestRegion, '28 Sep 2026', '28 Sep 2026'),
     stats: statsHtml,
     // Calendar years always get month labels, even the short first one (Oct to Dec 2024).
-    chart: renderChart(days, { xLabels: range.kind === 'year' ? 'month' : undefined }),
+    chart: renderChart(days, { xLabels: range.kind === 'year' ? 'month' : undefined, extent }),
     tableRows,
     tariff: tariffCode(region.code),
     updatedIso: now.toISOString(),
