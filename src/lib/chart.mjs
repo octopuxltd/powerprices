@@ -208,7 +208,10 @@ function renderTooltip(d, cx) {
   );
 }
 
+/** "Negative price for 2.5 hours" from a count of half-hour slots. */
 function negativeLabel(count) {
-  if (count === 0) return 'No negative half-hours';
-  return `${count} negative half-hour${count === 1 ? '' : 's'}`;
+  if (count === 0) return 'No negative prices';
+  if (count === 1) return 'Negative price for 30 minutes';
+  const hours = count / 2;
+  return `Negative price for ${hours} hour${hours === 1 ? '' : 's'}`;
 }
