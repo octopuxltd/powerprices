@@ -156,7 +156,7 @@ function renderPage({ template, groups, region, range, days, dataDays, startIso,
   const statsHtml = [
     tile('Average price', pence(stats.avg), `across ${dataDays.length} days`),
     tile('Cheapest half-hour', pence(stats.cheapest.incVat), longDateTime(stats.cheapest.from)),
-    tile('Hours of negative pricing', hours(stats.negativeSlots), `${stats.negativeSlots} half-hour ${stats.negativeSlots === 1 ? 'slot' : 'slots'}`),
+    tile('Hours of negative pricing', hours(stats.negativeSlots), negativeHoursDetail(stats)),
     tile(
       'Days with a negative period',
       String(stats.negativeDays),
@@ -198,6 +198,13 @@ function renderPage({ template, groups, region, range, days, dataDays, startIso,
 /** Half-hour slot count as hours: 421 → "210.5". */
 function hours(slots) {
   return String(slots / 2);
+}
+
+/** "average negative day gets 5.2 hours" */
+function negativeHoursDetail(stats) {
+  if (stats.negativeDays === 0) return 'none in this period';
+  const perDay = stats.negativeSlots / 2 / stats.negativeDays;
+  return `average negative day gets ${perDay.toFixed(1)} hours`;
 }
 
 function ledeText(region, fromDate, toDate) {
