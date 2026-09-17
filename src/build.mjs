@@ -163,10 +163,6 @@ function renderPage({ template, groups, region, range, days, dataDays, startIso,
   const regionSelect = REGIONS.map(
     (r) => `<option value="${pageHref(r, range)}"${r === region ? ' selected' : ''}>${escapeHtml(r.name)} (${r.code})</option>`,
   ).join('');
-  // The same list worded for the drop-down inside the intro sentence.
-  const regionSelectNames = REGIONS.map(
-    (r) => `<option value="${pageHref(r, range)}"${r === region ? ' selected' : ''}>${escapeHtml(r.name)} (region ${r.code})</option>`,
-  ).join('');
   const rangeSelect = groups
     .flat()
     .map((r) => `<option value="${pageHref(region, r)}"${r === range ? ' selected' : ''}>${r.label}</option>`)
@@ -204,7 +200,7 @@ function renderPage({ template, groups, region, range, days, dataDays, startIso,
     regionSelect,
     rangeSelect,
     regionName: escapeHtml(region.name),
-    lede: ledeText(region, longDate(startIso), longDate(endIso), regionSelectNames),
+    lede: ledeText(region, longDate(startIso), longDate(endIso), regionSelect),
     ledeGhost: ledeText(longestRegion, '28 Sep 2026', '28 Sep 2026'),
     stats: statsHtml,
     // Calendar years always get month labels, even the short first one (Oct to Dec 2024).
@@ -236,7 +232,7 @@ function negativeHoursDetail(stats) {
  */
 function ledeText(region, fromDate, toDate, options) {
   const date = (d) => `<span class="nowrap">${d}</span>`;
-  const name = `${escapeHtml(region.name)} (region ${region.code})`;
+  const name = `${escapeHtml(region.name)} (${region.code})`;
   const regionPart = options
     ? `<span class="region-text">${name}</span>` +
       `<select class="switcher-select lede-select" aria-label="Region">${options}</select>`
