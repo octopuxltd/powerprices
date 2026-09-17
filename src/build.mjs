@@ -163,10 +163,9 @@ function renderPage({ template, groups, region, range, days, dataDays, startIso,
   const regionSelect = REGIONS.map(
     (r) => `<option value="${pageHref(r, range)}"${r === region ? ' selected' : ''}>${escapeHtml(r.name)} (${r.code})</option>`,
   ).join('');
-  // Same list without the codes, for the drop-down inside the intro sentence
-  // (the sentence already says "(region C)" after it).
+  // The same list worded for the drop-down inside the intro sentence.
   const regionSelectNames = REGIONS.map(
-    (r) => `<option value="${pageHref(r, range)}"${r === region ? ' selected' : ''}>${escapeHtml(r.name)}</option>`,
+    (r) => `<option value="${pageHref(r, range)}"${r === region ? ' selected' : ''}>${escapeHtml(r.name)} (region ${r.code})</option>`,
   ).join('');
   const rangeSelect = groups
     .flat()
@@ -237,12 +236,12 @@ function negativeHoursDetail(stats) {
  */
 function ledeText(region, fromDate, toDate, options) {
   const date = (d) => `<span class="nowrap">${d}</span>`;
-  const name = escapeHtml(region.name);
+  const name = `${escapeHtml(region.name)} (region ${region.code})`;
   const regionPart = options
     ? `<span class="region-text">${name}</span>` +
       `<select class="switcher-select lede-select" aria-label="Region">${options}</select>`
     : name;
-  return `Half-hourly electricity prices for ${regionPart} (region ${region.code}), ${date(fromDate)} to ${date(toDate)}.`;
+  return `Half-hourly electricity prices for ${regionPart}, ${date(fromDate)} to ${date(toDate)}.`;
 }
 
 /**
