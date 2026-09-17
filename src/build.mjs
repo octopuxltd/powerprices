@@ -146,7 +146,8 @@ function renderPage({ template, groups, region, range, days, dataDays, startIso,
     tile('Average price', pence(stats.avg), `across ${dataDays.length} days`),
     tile('Cheapest half-hour', pence(stats.cheapest.incVat), longDateTime(stats.cheapest.from)),
     tile('Dearest half-hour', pence(stats.dearest.incVat), longDateTime(stats.dearest.from)),
-    tile('Negative-price half-hours', String(stats.negativeSlots), negativeDaysDetail(stats.negativeDays, dataDays.length)),
+    tile('Hours of negative pricing', hours(stats.negativeSlots), `${stats.negativeSlots} half-hour ${stats.negativeSlots === 1 ? 'slot' : 'slots'}`),
+    tile('Days with a negative period', String(stats.negativeDays), `of ${dataDays.length} days`),
   ].join('\n');
 
   const tableRows = dataDays
@@ -180,12 +181,9 @@ function renderPage({ template, groups, region, range, days, dataDays, startIso,
   });
 }
 
-/** "on 28 days · average: 1 every 9 days" */
-function negativeDaysDetail(negativeDays, totalDays) {
-  if (negativeDays === 0) return 'none in this period';
-  const every = Math.round(totalDays / negativeDays);
-  const rate = every <= 1 ? 'most days' : `average: 1 every ${every} days`;
-  return `on ${negativeDays} ${negativeDays === 1 ? 'day' : 'days'} · ${rate}`;
+/** Half-hour slot count as hours: 421 → "210.5". */
+function hours(slots) {
+  return String(slots / 2);
 }
 
 function ledeText(region, fromDate, toDate) {
@@ -206,7 +204,7 @@ function regionTooltip(region, summary) {
       `<span>Average ${pence(stats.avg)} across ${dataDays.length} days</span>`,
       `<span>Cheapest ${pence(stats.cheapest.incVat)} · ${longDateTime(stats.cheapest.from)}</span>`,
       `<span>Dearest ${pence(stats.dearest.incVat)} · ${longDateTime(stats.dearest.from)}</span>`,
-      `<span${stats.negativeSlots ? ' class="tip-neg"' : ''}>${stats.negativeSlots} negative half-hours on ${negDays}</span>`,
+      `<span${stats.negativeSlots ? ' class="tip-neg"' : ''}>${hours(stats.negativeSlots)} hours of negative pricing on ${negDays}</span>`,
     );
   }
   return `<span class="tip" aria-hidden="true">${lines.join('')}</span>`;
