@@ -200,11 +200,11 @@ function hours(slots) {
   return String(slots / 2);
 }
 
-/** "average negative day gets 5.2 hours" */
+/** "avg negative day gets 5.2 hrs" (abbreviated at Paul's request, to fit the tile) */
 function negativeHoursDetail(stats) {
   if (stats.negativeDays === 0) return 'none in this period';
   const perDay = stats.negativeSlots / 2 / stats.negativeDays;
-  return `average negative day gets ${perDay.toFixed(1)} hours`;
+  return `avg negative day gets ${perDay.toFixed(1)} hrs`;
 }
 
 function ledeText(region, fromDate, toDate) {
