@@ -155,7 +155,7 @@ function renderPage({ template, groups, region, range, days, dataDays, startIso,
 
   const statsHtml = [
     tile('Average price', pence(stats.avg), `across ${dataDays.length} days`),
-    tile('Cheapest half-hour', pence(stats.cheapest.incVat), longDateTime(stats.cheapest.from)),
+    tile('Cheapest half-hour', pence(stats.cheapest.incVat), longDateTime(stats.cheapest.from), { nowrap: true }),
     tile('Hours of negative pricing', hours(stats.negativeSlots), negativeHoursDetail(stats)),
     tile(
       'Days with a negative period',
@@ -230,11 +230,11 @@ function regionTooltip(region, summary) {
   return `<span class="tip" aria-hidden="true">${lines.join('')}</span>`;
 }
 
-function tile(label, value, detail) {
+function tile(label, value, detail, { nowrap = false } = {}) {
   return (
     `<div class="stat"><p class="label">${escapeHtml(label)}</p>` +
     `<p class="value">${escapeHtml(value)}</p>` +
-    `<p class="detail">${escapeHtml(detail)}</p></div>`
+    `<p class="detail${nowrap ? ' nowrap' : ''}">${escapeHtml(detail)}</p></div>`
   );
 }
 
