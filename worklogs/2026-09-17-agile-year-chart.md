@@ -3,6 +3,7 @@ _Updated: 2026-09-17 16:30_
 **Status:** complete
 
 ## Milestones (append-only)
+- 2026-09-17 16:50 — dots are now exactly the column width (nested `<svg viewBox="0 0 2 2">` scaled to the column, so it stays fluid); range line and ticks at 30%; one y scale on every page (−20p to 100p today); store rewritten to final days only (fixes the daily-commit conflict).
 - 2026-09-17 16:30 — marks redesigned: pink dot at the average (radius = old half bar width, floor 1.5px), single navy range line max→min with navy ticks at both ends, all at 50%; green dip overlay unchanged. Header and footer now full width (the `.measure` on them double-counted the gutter and made them narrower than everything else).
 - 2026-09-17 16:10 — live at http://powerprices.co.uk. Repo `octopuxltd/powerprices` (public), GitHub Pages via Actions, daily build at 16:45 UTC commits `data/` back. Porkbun DNS: parking ALIAS + wildcard removed, 4 A + 4 AAAA at apex, `www` CNAME. HTTPS enforcement pending GitHub's certificate. Pill layer order pinned with `z-index` on `::view-transition-group()`.
 - 2026-09-17 15:35 — key moved above the chart; explanatory sentences dropped from the lede; every switcher label got its own `view-transition-name` (inline, `range-label-*` / `region-label-*`) so the sliding pill's layer stacks below the labels. Layer order couldn't be probed in the preview pane (transitions abort with InvalidStateError there); follows from the spec's paint-order rule, needs Paul's eyes.
